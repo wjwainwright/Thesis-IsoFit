@@ -1,0 +1,25 @@
+\begin{thebibliography}{1}
+
+\bibitem{ESA}
+{{European Space Agency}},
+\newblock Gaia mission summary,
+\newblock
+  \href{http://sci.esa.int/gaia/28820-summary/}{http://sci.esa.int/gaia/28820-summary/}.
+
+\bibitem{GaiaSpec}
+{{European Space Agency}},
+\newblock Inside gaia's billion pixel camera,
+\newblock
+  \href{http://sci.esa.int/gaia/53281-inside-gaia-s-billion-pixel-camera/}{http://sci.esa.int/gaia/53281-inside-gaia-s-billion-pixel-camera/}.
+
+\bibitem{GaiaData}
+{{European Space Agency}},
+\newblock Gaia archive - data release 2,
+\newblock
+  \href{https://gea.esac.esa.int/archive/}{https://gea.esac.esa.int/archive/}.
+
+\bibitem{Yadav}
+{Yadav, R. K. S.} {\em et~al.},
+\newblock A\&A {\bf 484}, 609 (2008).
+
+\end{thebibliography}
