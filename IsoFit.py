@@ -538,8 +538,7 @@ def distFilter(cluster):
     #Imports
     import numpy as np
     
-    #Set back to 1.5 after done with capstone paper
-    threshold = 100
+    threshold = 1.5
     
     for star in cluster.unfilteredWide:
         if not np.greater(np.abs(star.par-cluster.mean_par),threshold*cluster.stdev_par):
@@ -577,6 +576,8 @@ def turboFit():
         cluster.reddening = reddening
         print(f"Reddening: {reddening}")
         
+        #print(upScore,downScore)
+        
         cluster.mag[:,0] -= reddening
         cluster.mag[:,1] -= reddening*conversion
     
@@ -584,6 +585,7 @@ def turboFit():
     
     for cluster in clusterList:
         shapeFit(cluster,0)
+        #print(cluster.iso[0][1])
             
             
 
@@ -599,17 +601,52 @@ def shapeFit(cluster,reddening):
     
     cluster.iso = np.empty((0,2))
     for iso in isoList:
-        isoLine = geom.LineString(tuple(zip([x+conversion*reddening for x in iso.br],[x+cluster.dist_mod+reddening for x in iso.g])))
+        isoLine = geom.LineString(tuple(zip([x+reddening for x in iso.br],[x+cluster.dist_mod+conversion*reddening for x in iso.g])))
         dist = []
         for star in cluster.condensed:
             starPt = geom.Point(star[0],star[1])
             #print(starPt.distance(isoLine))
             dist.append(np.abs(starPt.distance(isoLine)))
         isoScore = np.mean(dist[:])
+        #print(isoScore,dist)
         #print(list(geom.shape(isoLine).coords))
         cluster.iso = np.r_[cluster.iso,[[iso,isoScore]]]
         #print(isoScore)
     cluster.iso = sorted(cluster.iso,key=lambda x: x[1])
+    
+    
+def testFit(cl,rank):
+    #Imports
+    import numpy as np
+    import shapely.geometry as geom
+    global isoList
+    
+    cluster = clusters[cl]
+    iso = cluster.iso[rank][0]
+    
+    isoLine = geom.LineString(tuple(zip(iso.br,[x+cluster.dist_mod for x in iso.g])))
+    dist = []
+    for star in cluster.condensed:
+        starPt = geom.Point(star[0],star[1])
+        #print(starPt.distance(isoLine))
+        dist.append(np.abs(starPt.distance(isoLine)))
+    isoScore = np.mean(dist[:])
+    
+    print(isoScore,dist)
+    specificPlot(cl,iso.name)
+    
+    import matplotlib.pyplot as plt
+    
+    plt.figure(f"{cl}_{iso}")
+    plt.gca().invert_yaxis()
+    plt.xlabel('B-R')
+    plt.ylabel('G Mag')
+    plt.title(f"{cl} {iso.name}")
+    plt.scatter(cluster.mag[:,0],cluster.mag[:,1],s=0.05,c='olive',label='Cluster')
+    plt.plot(iso.br,[x+cluster.dist_mod for x in iso.g],c='midnightblue',label=f"Score: {isoScore}")
+    plt.scatter(cluster.condensed[:,0],cluster.condensed[:,1],s=5,c='red',label='Cluster Proxy')
+    plt.legend()
+    
     
 
 
