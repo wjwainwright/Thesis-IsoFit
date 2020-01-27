@@ -564,8 +564,10 @@ def turboFit():
         
         for fit in range(fitCount):
             shapeFit(cluster,reddening + difference)
+            checkInstances(f"Reddening {reddening+difference}")
             upScore = cluster.iso[0][1]
             shapeFit(cluster,reddening - difference)
+            checkInstances(f"Reddening {reddening-difference}")
             downScore = cluster.iso[0][1]
             
             if upScore < downScore:
@@ -585,6 +587,7 @@ def turboFit():
     
     for cluster in clusterList:
         shapeFit(cluster,0)
+        checkInstances(f"Reddening 0 final")
         #print(cluster.iso[0][1])
             
             
@@ -611,10 +614,69 @@ def shapeFit(cluster,reddening):
         #print(isoScore,dist)
         #print(list(geom.shape(isoLine).coords))
         cluster.iso = np.r_[cluster.iso,[[iso,isoScore]]]
+        #compareInstances(iso,cluster.iso[-1][0])
         #print(isoScore)
-    cluster.iso = sorted(cluster.iso,key=lambda x: x[1])
+    #cluster.iso = sorted(cluster.iso,key=lambda x: x[1])
+    
+
+def compareInstances(i1,i2):
+    print(f"{i1}    {i2}")
+    if not len(i1.br) == len(i2.br):
+        print(f"{i1.name} and {i2.name} are not identical")
+
+
+
+def checkInstances(stage):
+    import numpy as np
+    
+    count = 0
+    total = 0
+    global positions
+    positions = []
+    for cli in clusterList[0].iso:
+        total = total + 1
+        cliso = cli[0]
+        iso = isochrones[cliso.name]
+        
+        
+        
+        #print(f"Iso: {iso.name} : {iso}    Cliso: {cliso.name} : {cliso}")
+        #sim_br = np.mean(np.subtract(iso.br,cliso.br))
+        #sim_g = np.mean(np.subtract(iso.g,cliso.g))
+        
+        if not len(cliso.br) == len(iso.br) :
+            #print(f"Iso: {iso.name} {iso}    Cliso: {cliso.name} {cliso} do not match in number of points")
+            positions.append(total-1)
+            count = count + 1
+    print(f"Stage: {stage}    Count: {count}    Total points: {total}    Fraction: {count/total}    Positions: {len(positions)} points over {positions[0]} -> {positions[-1]} ({len(positions)/(positions[-1]-positions[0])*100}%)")
     
     
+def plotPositions():
+    import matplotlib.pyplot as plt
+    import numpy as np
+    global positions
+    
+    xrange = np.arange(len(positions))
+    yrange = np.zeros(len(positions))
+    
+    for x in xrange:
+        if x in positions:
+            yrange[x] = 1
+        else:
+            yrange[x] = 0
+    
+    plt.figure("Instance Positions")
+    plt.title("Instance Positions")
+    plt.xlabel("Array Position")
+    plt.ylabel("Unchanged = 0; Changed = 1")
+    plt.scatter(xrange,yrange)
+    plt.savefig(f"SpecificPlots/pdf/InstancePositions.pdf")
+    plt.savefig(f"SpecificPlots/png/InstancePositions.png")
+    
+    
+    
+    
+
 def testFit(cl,rank):
     #Imports
     import numpy as np
