@@ -655,9 +655,10 @@ def plotPositions():
     import matplotlib.pyplot as plt
     import numpy as np
     global positions
+    global isoList
     
-    xrange = np.arange(len(positions))
-    yrange = np.zeros(len(positions))
+    xrange = np.arange(len(isoList))
+    yrange = np.zeros(len(isoList))
     
     for x in xrange:
         if x in positions:
@@ -665,13 +666,21 @@ def plotPositions():
         else:
             yrange[x] = 0
     
-    plt.figure("Instance Positions")
+    plt.figure("Instance Positions",figsize=(15,3))
     plt.title("Instance Positions")
     plt.xlabel("Array Position")
     plt.ylabel("Unchanged = 0; Changed = 1")
-    plt.scatter(xrange,yrange)
+    plt.scatter(xrange,yrange,s=0.5)
     plt.savefig(f"SpecificPlots/pdf/InstancePositions.pdf")
     plt.savefig(f"SpecificPlots/png/InstancePositions.png")
+    
+    plt.figure("Instance Positions Line",figsize=(15,3))
+    plt.title("Instance Positions")
+    plt.xlabel("Array Position")
+    plt.ylabel("Unchanged = 0; Changed = 1")
+    plt.plot(xrange,yrange)
+    plt.savefig(f"SpecificPlots/pdf/InstancePositionsLine.pdf")
+    plt.savefig(f"SpecificPlots/png/InstancePositionsLine.png")
     
     
     
