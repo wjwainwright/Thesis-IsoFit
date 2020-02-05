@@ -106,9 +106,8 @@ class starObj:
 
 
 class isochroneObj:
-    def __init__(self,age=404,feh=404,afe=404,name='genericIsochrone',basedir='isochrones/',subdir='processed',isodir=''):
+    def __init__(self,age=404,feh=404,afe=404,y=404,basedir='isochrones/',subdir='processed',isodir=''):
         #Declare instance variables
-        self.name = name
         self.basedir = basedir
         self.subdir = subdir
         self.isodir = isodir
@@ -116,6 +115,8 @@ class isochroneObj:
         self.age = age
         self. feh = feh
         self.afe = afe
+        self.y = y
+        self.name = f"feh_{feh}_afe_{afe}_age_{age}_y_{y}"
         self.distance = 0
         self.coeff = []
         self.g = []
@@ -244,10 +245,15 @@ def readIsochrones(basedir='isochrones/',subdir='processed/'):
             ageStr = fn.split('.csv')[0]
             fehStr = folder.split('feh')[1].split('afe')[0]
             afeStr = folder.split('afe')[1].split('y')[0]
+            if 'y' in folder:
+                yStr = folder.split('y')[1]
+            else:
+                yStr = '0'
             
             feh = float(fehStr[1]+fehStr[2])/10
             afe = float(afeStr[1])/10
             age = float(ageStr)
+            y = float(yStr)
             
             if fehStr[0] == 'm':
                 feh = feh*-1
@@ -258,7 +264,7 @@ def readIsochrones(basedir='isochrones/',subdir='processed/'):
             #print(f"folder:{folder}   fn:{fn}   fehStr:{fehStr}   feh:{feh}   afeStr:{afeStr}   afe:{afe}   ageStr:{ageStr}   age:{age}")
             
             #Create isochone object
-            iso = isochroneObj(age=age,feh=feh,afe=afe,name=f"feh_{feh}_afe_{afe}_age_{age}",basedir=basedir,subdir=subdir,isodir=folder+'/')
+            iso = isochroneObj(age=age,feh=feh,afe=afe,y=y,basedir=basedir,subdir=subdir,isodir=folder+'/')
             
             isoArr = np.genfromtxt(basedir+subdir+folder+"/"+fn, delimiter=",")
             for s in isoArr:
@@ -564,10 +570,8 @@ def turboFit():
         
         for fit in range(fitCount):
             shapeFit(cluster,reddening + difference)
-            checkInstances(f"Reddening {reddening+difference}")
             upScore = cluster.iso[0][1]
             shapeFit(cluster,reddening - difference)
-            checkInstances(f"Reddening {reddening-difference}")
             downScore = cluster.iso[0][1]
             
             if upScore < downScore:
@@ -587,7 +591,6 @@ def turboFit():
     
     for cluster in clusterList:
         shapeFit(cluster,0)
-        checkInstances(f"Reddening 0 final")
         #print(cluster.iso[0][1])
             
             
@@ -616,7 +619,7 @@ def shapeFit(cluster,reddening):
         cluster.iso = np.r_[cluster.iso,[[iso,isoScore]]]
         #compareInstances(iso,cluster.iso[-1][0])
         #print(isoScore)
-    #cluster.iso = sorted(cluster.iso,key=lambda x: x[1])
+    cluster.iso = sorted(cluster.iso,key=lambda x: x[1])
     
 
 def compareInstances(i1,i2):

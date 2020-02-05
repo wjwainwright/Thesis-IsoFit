@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
 class isochroneObj:
-    def __init__(self,age=404,feh=404,afe=404,name='genericIsochrone',basedir='isochrones/',subdir='processed',isodir=''):
+    def __init__(self,age=404,feh=404,afe=404,y=404,basedir='isochrones/',subdir='processed',isodir=''):
         #Declare instance variables
-        self.name = name
         self.basedir = basedir
         self.subdir = subdir
         self.isodir = isodir
@@ -11,6 +10,8 @@ class isochroneObj:
         self.age = age
         self. feh = feh
         self.afe = afe
+        self.y = y
+        self.name = f"feh_{feh}_afe_{afe}_age_{age}_y_{y}"
         self.distance = 0
         self.coeff = []
         self.g = []
@@ -44,10 +45,15 @@ def readIsochrones(basedir='isochrones/',subdir='processed/'):
             ageStr = fn.split('.csv')[0]
             fehStr = folder.split('feh')[1].split('afe')[0]
             afeStr = folder.split('afe')[1].split('y')[0]
+            if 'y' in folder:
+                yStr = folder.split('y')[1]
+            else:
+                yStr = '0'
             
             feh = float(fehStr[1]+fehStr[2])/10
             afe = float(afeStr[1])/10
             age = float(ageStr)
+            y = float(yStr)
             
             if fehStr[0] == 'm':
                 feh = feh*-1
@@ -58,7 +64,7 @@ def readIsochrones(basedir='isochrones/',subdir='processed/'):
             #print(f"folder:{folder}   fn:{fn}   fehStr:{fehStr}   feh:{feh}   afeStr:{afeStr}   afe:{afe}   ageStr:{ageStr}   age:{age}")
             
             #Create isochone object
-            iso = isochroneObj(age=age,feh=feh,afe=afe,name=f"feh_{feh}_afe_{afe}_age_{age}",basedir=basedir,subdir=subdir,isodir=folder+'/')
+            iso = isochroneObj(age=age,feh=feh,afe=afe,y=y,basedir=basedir,subdir=subdir,isodir=folder+'/')
             
             isoArr = np.genfromtxt(basedir+subdir+folder+"/"+fn, delimiter=",")
             for s in isoArr:
@@ -78,10 +84,14 @@ def toDict():
     global isoIn
     
     if isoIn:
-        isoName=[]
+        isochrones = dict()
+        isoName = []
         for iso in isoList:
+            if iso.name in isoName:
+                print(f"{iso.name} is already in the list")
             isoName.append(iso.name)
-        isochrones = dict(zip(isoName,isoList))
+            isochrones.update({iso.name : iso})
+        #isochrones = dict(zip(isoName,isoList))
 
 
 def copyOver():
