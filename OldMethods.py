@@ -300,4 +300,35 @@ for star in filtered:
 cluster.mag = mag
 """
 
+#Condensed
+"""
+distances=[]
+
+#Find average distance to nearby points
+for i,point1 in enumerate(condensed):
+    for j,point2 in enumerate(condensed):
+        if np.abs(i-j) == 1:
+                    distances.append(np.sqrt((point1[0]-point2[0])**2+(point1[1]-point2[1])**2))
+
+
+medDist = np.median(distances)
+stdevDist = np.std(distances)
+distThreshold = 3
+nearbyThreshold = -1
+
+#Find nearby points
+for i,point1 in enumerate(condensed):
+    for j,point2 in enumerate(condensed):
+        if not i == j and np.abs(np.sqrt((point1[0]-point2[0])**2+(point1[1]-point2[1])**2)-medDist) < distThreshold*stdevDist:
+            point1[2] += 1
+
+cluster.condensed = np.empty((0,3))
+
+#Remove points 
+for n,pt in enumerate(condensed):
+    if pt[0] > cluster.turnPoint[0] and pt[2] > nearbyThreshold:
+        cluster.condensed = np.r_[cluster.condensed,[[pt[0],pt[1],pt[2]]]]
+print(f"{len(condensed)-len(cluster.condensed)} points removed")
+"""
+
 

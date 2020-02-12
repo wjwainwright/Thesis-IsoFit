@@ -656,47 +656,21 @@ def condense():
                 break
         assert not index == 0
         
-        weightLim = 1.5
-        gap = 8
+        N = len(condensed)
+        alpha = 0.1
+        beta = 10
+        
         
         for i,point in enumerate(condensed):
-            #point[2] = weightLim/(1+np.abs(index-i))
-            if i > index - gap:
-                point[2] = weightLim
+            #point[2] = 5/(1+np.abs(index-i))
+            point[2] = 1/(1+alpha*np.exp(beta*((i-index)/N)**2))
+            
         
         condensed = condensed[::-1]
         
         
         cluster.condensed = condensed
-        """
-        distances=[]
         
-        #Find average distance to nearby points
-        for i,point1 in enumerate(condensed):
-            for j,point2 in enumerate(condensed):
-                if np.abs(i-j) == 1:
-                            distances.append(np.sqrt((point1[0]-point2[0])**2+(point1[1]-point2[1])**2))
-        
-        
-        medDist = np.median(distances)
-        stdevDist = np.std(distances)
-        distThreshold = 3
-        nearbyThreshold = -1
-        
-        #Find nearby points
-        for i,point1 in enumerate(condensed):
-            for j,point2 in enumerate(condensed):
-                if not i == j and np.abs(np.sqrt((point1[0]-point2[0])**2+(point1[1]-point2[1])**2)-medDist) < distThreshold*stdevDist:
-                    point1[2] += 1
-        
-        cluster.condensed = np.empty((0,3))
-        
-        #Remove points 
-        for n,pt in enumerate(condensed):
-            if pt[0] > cluster.turnPoint[0] and pt[2] > nearbyThreshold:
-                cluster.condensed = np.r_[cluster.condensed,[[pt[0],pt[1],pt[2]]]]
-        print(f"{len(condensed)-len(cluster.condensed)} points removed")
-        """
 
 
 def toDict():
