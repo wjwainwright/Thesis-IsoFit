@@ -14,6 +14,7 @@ class clusterObj:
         self.mag = []
         self.iso = []
         self.condensed = []
+        self.condensed0 = []
         self.unfilteredBright = []
         self.filteredBright = []
         self.brightmag = []
@@ -242,7 +243,7 @@ def readIsochrones(basedir='isochrones/',subdir='processed/'):
             feh = float(fehStr[1]+fehStr[2])/10
             afe = float(afeStr[1])/10
             age = float(ageStr)
-            y = float(yStr)
+            y = int(yStr)
             
             if fehStr[0] == 'm':
                 feh = feh*-1
@@ -445,6 +446,11 @@ def turboFilter():
         cluster.filtered,cluster.mag = pmFilter(cluster.distFiltered,cluster.name)
         print(f"pm(all): {len(cluster.filtered)}")
         
+        """
+        for i in range(10):
+            print(f"{cluster.filtered[i].b_r}   {cluster.mag[i,0]}")
+        """
+        
         setFlag()
 
 def pmFilter(starList,name):
@@ -488,34 +494,27 @@ def distFilter(cluster):
 
 def turboFit():
     #Imports
+    import numpy as np
     global clusterList
-    
-    fitCount = 10
     
     conversion = 2.1
     
+    redList = [round(x,2) for x in np.arange(0,1.05,0.05)]
+    
     condense()
+
     
     for cluster in clusterList:
+        cluster.iso = []
         
-        reddening = 0.5
-        difference = 0.5
+        for reddening in redList:
+            shapeFit(cluster,reddening)
         
-        for fit in range(fitCount):
-            shapeFit(cluster,reddening + difference)
-            upScore = cluster.iso[0][1]
-            shapeFit(cluster,reddening - difference)
-            downScore = cluster.iso[0][1]
-            
-            if upScore < downScore:
-                reddening = reddening + difference
-            else:
-                reddening = reddening - difference
-            difference = difference/2
+        reddening = cluster.iso[0][2]
+        
         cluster.reddening = reddening
         print(f"Reddening: {reddening}")
         
-        #print(upScore,downScore)
         
         cluster.mag[:,0] -= reddening
         cluster.mag[:,1] -= reddening*conversion
@@ -535,23 +534,23 @@ def shapeFit(cluster,reddening):
     import shapely.geometry as geom
     global isoList
     
-    
     conversion = 2.1
     
-    cluster.iso = np.empty((0,2))
+    isoFitList = np.empty((0,3))
     for iso in isoList:
         isoLine = geom.LineString(tuple(zip([x+reddening for x in iso.br],[x+cluster.dist_mod+conversion*reddening for x in iso.g])))
         dist = []
         for star in cluster.condensed:
             starPt = geom.Point(star[0],star[1])
             #print(starPt.distance(isoLine))
-            dist.append(np.abs(starPt.distance(isoLine))/star[2])
+            dist.append(np.abs(starPt.distance(isoLine))*star[2])
         isoScore = np.mean(dist[:])
         #print(isoScore,dist)
         #print(list(geom.shape(isoLine).coords))
-        cluster.iso = np.r_[cluster.iso,[[iso,isoScore]]]
+        isoFitList = np.r_[isoFitList,[[iso,isoScore,reddening]]]
         #compareInstances(iso,cluster.iso[-1][0])
         #print(isoScore)
+    cluster.iso.extend(isoFitList)
     cluster.iso = sorted(cluster.iso,key=lambda x: x[1])
     
     
@@ -598,6 +597,7 @@ def condense():
         condensed = condensed[::-1]
         
         #Find Turning Point
+        counts=[]
         for i,point1 in enumerate(condensed):
             count = 0
             total = 0
@@ -606,19 +606,26 @@ def condense():
                     total += 1
                     if point2[0] > point1[0]:
                         count += 1
-            threshold = 0.5
+            counts.append(count)
             if not (total == 0) and not (count == 0):
-                if count/total >= threshold:
-                    turnPoints.append([point1[0],point1[1]])
+                turnPoints.append([point1[0],point1[1],count])
         
+        """
+        #Analysis Plot
+        import matplotlib.pyplot as plt
+        plt.figure()
+        plt.scatter(condensed[:,0],condensed[:,1],c=counts)
+        plt.set_cmap('brg')
+        clb = plt.colorbar()
+        """
         
         
         if len(turnPoints) == 0:
             print("No turning point identified")
             return
         else:
-            turnPoints = sorted(turnPoints,key=lambda x: x[0])
-            cluster.turnPoint = turnPoints[0]
+            turnPoints = sorted(turnPoints,key=lambda x: x[2])
+            cluster.turnPoint = turnPoints[-1]
             print(f"Turning point: {cluster.turnPoint}")
         
         
@@ -653,22 +660,26 @@ def condense():
         for i,point in enumerate(condensed):
             if newTP == point[1]:
                 index = i
+                #print(f"{point} found to be TP")
                 break
         assert not index == 0
         
         N = len(condensed)
         alpha = 0.1
         beta = 10
+        c = alpha + 1
         
+        index = index - 5
         
         for i,point in enumerate(condensed):
             #point[2] = 5/(1+np.abs(index-i))
-            point[2] = 1/(1+alpha*np.exp(beta*((i-index)/N)**2))
+            point[2] = c/(1+alpha*np.exp(beta*((i-index)/N)**2))
             
         
         condensed = condensed[::-1]
         
-        
+        if cluster.reddening == 0:
+            cluster.condensed0 = condensed
         cluster.condensed = condensed
         
 
@@ -1001,6 +1012,7 @@ def specificPlot(cl,iso):
     
     score = 0
     
+    
     if not os.path.isdir("SpecificPlots/pdf/"):
         os.makedirs("SpecificPlots/pdf/")
     if not os.path.isdir("SpecificPlots/png/"):
@@ -1009,17 +1021,18 @@ def specificPlot(cl,iso):
     for chrone in cluster.iso:
         if chrone[0].name == iso:
             score = chrone[1]
+            reddening = chrone[2]
             break
     
     #Isochrone CMD fit
-    plt.figure(f"{cl}_{iso}")
+    plt.figure()
     plt.gca().invert_yaxis()
     plt.xlabel('B-R')
     plt.ylabel('G Mag')
     plt.title(f"{cl} {iso}")
-    plt.scatter(cluster.mag[:,0],cluster.mag[:,1],s=0.05,c='olive',label='Cluster')
-    plt.plot(isochrone.br,[x+cluster.dist_mod for x in isochrone.g],c='midnightblue',label=f"Score: {score}")
-    plt.scatter(cluster.condensed[:,0],cluster.condensed[:,1],s=5,c=[z[2] for z in cluster.condensed],label='Cluster Proxy')
+    plt.scatter([s.b_r for s in cluster.filtered],[s.g_mag for s in cluster.filtered],s=0.05,c='olive',label='Cluster')
+    plt.plot([x + reddening for x in isochrone.br],[x+cluster.dist_mod+2.1*reddening for x in isochrone.g],c='midnightblue',label=f"Score: {score}")
+    plt.scatter(cluster.condensed0[:,0],cluster.condensed0[:,1],s=5,c=[z[2] for z in cluster.condensed],label='Cluster Proxy')
     
     plt.set_cmap('brg')
     clb = plt.colorbar()
@@ -1028,11 +1041,11 @@ def specificPlot(cl,iso):
     extra = Rectangle((0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0)
     h,l = plt.gca().get_legend_handles_labels()
     h.insert(0,extra)
-    l.insert(0,f"Reddening: {cluster.reddening}")
+    l.insert(0,f"Reddening: {reddening}")
     plt.legend(h,l)
     
-    plt.savefig(f"SpecificPlots/pdf/Requested_Plot_{cl}_{iso}.pdf")
-    plt.savefig(f"SpecificPlots/png/Requested_Plot_{cl}_{iso}.png")
+    plt.savefig(f"SpecificPlots/pdf/Requested_Plot_{cl}_{iso}_Reddening_{reddening}.pdf")
+    plt.savefig(f"SpecificPlots/png/Requested_Plot_{cl}_{iso}_Reddening_{reddening}.png")
 
 
 def plotRange(cl,a,b):
