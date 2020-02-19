@@ -11,7 +11,7 @@ def func(alpha,beta,c,q,N):
 x = np.arange(0,50,1)
 N = len(x)
 q = 35
-alpha = 0.01
+alpha = 0.1
 beta = 10
 c = alpha+1
 weight = func(alpha,beta,c,q,N)

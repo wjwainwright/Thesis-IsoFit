@@ -495,35 +495,39 @@ def distFilter(cluster):
 def turboFit():
     #Imports
     import numpy as np
+    from sys import stdout
+    import time
+    from time import sleep
     global clusterList
     
-    conversion = 2.1
+    redList = [round(x,2) for x in np.arange(0,1.01,0.05)]
     
-    redList = [round(x,2) for x in np.arange(0,1.05,0.05)]
+    t0 = time.time()
     
     condense()
 
-    
     for cluster in clusterList:
         cluster.iso = []
         
         for reddening in redList:
+            stdout.write(f"\rCurrent reddening value: {reddening} / {redList[-1]}")
             shapeFit(cluster,reddening)
+            stdout.flush()
+            sleep(0.1)
         
         reddening = cluster.iso[0][2]
         
         cluster.reddening = reddening
-        print(f"Reddening: {reddening}")
+        print(f"\nReddening: {reddening}")
         
-        
-        cluster.mag[:,0] -= reddening
-        cluster.mag[:,1] -= reddening*conversion
+        #cluster.mag[:,0] -= reddening
+        #cluster.mag[:,1] -= reddening*2.1
     
     condense()
     
-    for cluster in clusterList:
-        shapeFit(cluster,0)
-        #print(cluster.iso[0][1])
+    t1 = time.time()
+    
+    print(f"Total fit runtime: {t1-t0} seconds")
             
             
 
@@ -534,6 +538,7 @@ def shapeFit(cluster,reddening):
     import shapely.geometry as geom
     global isoList
     
+    
     conversion = 2.1
     
     isoFitList = np.empty((0,3))
@@ -543,7 +548,7 @@ def shapeFit(cluster,reddening):
         for star in cluster.condensed:
             starPt = geom.Point(star[0],star[1])
             #print(starPt.distance(isoLine))
-            dist.append(np.abs(starPt.distance(isoLine))*star[2])
+            dist.append(np.abs(starPt.distance(isoLine))/star[2])
         isoScore = np.mean(dist[:])
         #print(isoScore,dist)
         #print(list(geom.shape(isoLine).coords))
