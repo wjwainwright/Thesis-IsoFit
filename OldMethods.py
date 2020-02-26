@@ -331,4 +331,90 @@ for n,pt in enumerate(condensed):
 print(f"{len(condensed)-len(cluster.condensed)} points removed")
 """
 
-
+#Plot
+"""
+ index=0
+        
+        #De-tangle star properties
+        for star in cluster.unfilteredWide:
+            
+            #Unfiltered arrays
+            unfra.append(star.ra)
+            unfdec.append(star.dec)
+            unfpmra.append(star.pmra)
+            unfpmdec.append(star.pmdec)
+            unfgmag.append(star.g_mag)
+            unf_b_r.append(star.b_r)
+            unfpara.append(star.par)
+            
+            if not np.isnan(star.e_bp_rp):
+                ebr_ra.append(star.ra)
+                ebr_dec.append(star.dec)
+            
+            
+            
+            if index < len(cluster.filtered):
+                #Put info for filtered list too
+                if star == cluster.filtered[index]:
+                    index += 1
+                    ra.append(star.ra)
+                    dec.append(star.dec)
+                    pmra.append(star.pmra)
+                    pmdec.append(star.pmdec)
+                    gmag.append(star.g_mag)
+                    b_r.append(star.b_r)
+                    para.append(star.par)
+                    
+        #Test plots
+        if test:
+            #Color Color
+            plt.figure(f"{cluster.name}_color_color")
+            plt.xlabel('B-R')
+            plt.ylabel('B-R')
+            plt.title(f"{cluster.name} Color Color")
+            plt.scatter(unf_b_r[:],unf_b_r[:],s=0.025,c='olive')
+            plt.axis("square")
+            plt.savefig(f"{cluster.imgPath}test/{cluster.name}_color_color.pdf")
+            
+            #Wack
+            plt.figure(f"{cluster.name}_wack")
+            plt.xlabel('??')
+            plt.ylabel('??')
+            plt.title(f"{cluster.name} Wack")
+            plt.scatter([a*b for a,b in zip(unfpmra,unfpmdec)],[a*b for a,b in zip(unfra,unfdec)],s=0.025,c='olive')
+            #plt.axis("square")
+            plt.savefig(f"{cluster.imgPath}test/{cluster.name}_wack.pdf")
+            
+            #Wack2
+            plt.figure(f"{cluster.name}_wack2")
+            plt.xlabel('??')
+            plt.ylabel('??')
+            plt.title(f"{cluster.name} Wack")
+            plt.scatter([a*b for a,b in zip(unfpmra,unfpmdec)],unfpara,s=0.025,c='olive')
+            #plt.scatter([a*b for a,b in zip(pmra,pmdec)],para,s=0.025,c='midnightblue')
+            #plt.axis("square")
+            plt.savefig(f"{cluster.imgPath}test/{cluster.name}_wack2.pdf")
+            
+            #Wack3
+            plt.figure(f"{cluster.name}_wack3")
+            plt.xlabel('??')
+            plt.ylabel('??')
+            plt.title(f"{cluster.name} Wack")
+            plt.scatter([a*b for a,b in zip(unfpmra,unfpmdec)],unfpara,s=0.025,c='olive')
+            #plt.scatter([a*b for a,b in zip(pmra,pmdec)],para,s=0.025,c='midnightblue')
+            #plt.axis("square")
+            plt.savefig(f"{cluster.imgPath}test/{cluster.name}_wack3.pdf")
+            
+            
+            #Position reddening overlay
+            plt.figure(f"{cluster.name}_ra_dec_reddening_overlay")
+            plt.xlabel('RA')
+            plt.ylabel('DEC')
+            plt.title(f"{cluster.name} Reddening Overlay")
+            plt.scatter(unfra[:],unfdec[:],s=0.025,c='olive')
+            plt.scatter(ebr_ra[:],ebr_dec[:],s=0.75,c='midnightblue')
+            plt.axis("square")
+            plt.savefig(f"{cluster.imgPath}{cluster.name}_ra_dec_reddening_overlay.pdf")
+            
+            
+"""

@@ -15,6 +15,7 @@ class clusterObj:
         self.iso = []
         self.condensed = []
         self.condensed0 = []
+        self.condensedInit=[]
         self.unfilteredBright = []
         self.filteredBright = []
         self.brightmag = []
@@ -165,8 +166,9 @@ def readClusters(clusters=["M67"],basedir="clusters/",smRad=0.35):
         stars = pd.read_csv(cluster.dataPath+"wide.csv",sep=',',dtype=str)
         starlist = starlist.to_numpy(dtype=str)
         #starlist = np.genfromtxt(cluster.dataPath+"wide.csv", delimiter=",", skip_header=1)
-        print(len(starlist))
+        print(f"{clname} initial length: {len(starlist)}")
         starlist = preFilter(starlist)
+        print(f"{clname} post-prefiltered length: {len(starlist)}")
         
         ramean = np.mean([float(x) for x in starlist[:,1]])
         decmean = np.mean([float(x) for x in starlist[:,3]])
@@ -439,6 +441,7 @@ def turboFilter():
     for cluster in clusterList:
         
         cluster.filteredBright,cluster.brightmag = pmFilter(cluster.unfilteredBright,cluster.name)
+        print(f"==========================={cluster.name}===========================")
         print(f"bright unf/pm fil: {len(cluster.unfilteredBright)}   /   {len(cluster.filteredBright)}")
         calcStats(cluster,bright=True)
         distFilter(cluster)
@@ -452,6 +455,7 @@ def turboFilter():
         """
         
         setFlag()
+    print(f"=========================Fitting=========================")
 
 def pmFilter(starList,name):
     #Imports
@@ -492,7 +496,7 @@ def distFilter(cluster):
 
 
 
-def turboFit():
+def turboFit(method='pos'):
     #Imports
     import numpy as np
     from sys import stdout
@@ -504,13 +508,13 @@ def turboFit():
     
     t0 = time.time()
     
-    condense()
+    condense(method)
 
     for cluster in clusterList:
         cluster.iso = []
         
         for reddening in redList:
-            stdout.write(f"\rCurrent reddening value: {reddening} / {redList[-1]}")
+            stdout.write(f"\rCurrent reddening value for {cluster.name}: {reddening} / {redList[-1]}")
             shapeFit(cluster,reddening)
             stdout.flush()
             sleep(0.1)
@@ -518,16 +522,14 @@ def turboFit():
         reddening = cluster.iso[0][2]
         
         cluster.reddening = reddening
-        print(f"\nReddening: {reddening}")
+        print(f"\nReddening for {cluster.name}: {reddening}")
         
         #cluster.mag[:,0] -= reddening
         #cluster.mag[:,1] -= reddening*2.1
     
-    condense()
-    
     t1 = time.time()
     
-    print(f"Total fit runtime: {t1-t0} seconds")
+    print(f"Total {cluster.name} fit runtime: {t1-t0} seconds")
             
             
 
@@ -568,7 +570,7 @@ def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return array[idx]
 
-def condense():
+def condense(method):
     #Imports
     import numpy as np
     global clusterList
@@ -626,12 +628,15 @@ def condense():
         
         
         if len(turnPoints) == 0:
-            print("No turning point identified")
+            print("No turning point identified for {cluster.name}")
             return
         else:
             turnPoints = sorted(turnPoints,key=lambda x: x[2])
-            cluster.turnPoint = turnPoints[-1]
-            print(f"Turning point: {cluster.turnPoint}")
+            tp = turnPoints[-1]
+            tp[0] = tp[0] - 0.05*np.abs(tp[0])
+            cluster.turnPoint = tp
+            cluster.condensedInit = condensed
+            print(f"{cluster.name} Turning Point: {cluster.turnPoint}")
         
         
         #Recalc with the turnPoint limit enforced - Ignore blue stragglers
@@ -678,7 +683,8 @@ def condense():
         
         for i,point in enumerate(condensed):
             #point[2] = 5/(1+np.abs(index-i))
-            point[2] = c/(1+alpha*np.exp(beta*((i-index)/N)**2))
+            if method == 'pos':
+                point[2] = c/(1+alpha*np.exp(beta*((i-index)/N)**2))
             
         
         condensed = condensed[::-1]
@@ -714,118 +720,47 @@ def toDict():
         isochrones = dict(zip(isoName,isoList))
 
 
-def plot(pos=True,pm=True,cmd=True,iso=True,test=False):
+def plot(cl=clusterList,pos=True,pm=True,cmd=True,iso=True,test=False):
     #Imports
     import matplotlib.pyplot as plt
+    from matplotlib.patches import Rectangle
     import numpy as np
     global clusterList
     
-    for cluster in clusterList:
+    if type(cl[0]) is str:
+        clarr = []
+        for s in cl:
+            clarr.append(clusters[s])
+        cl = clarr
+    
+    for cluster in cl:
         
         #Arrays for plotting
-        unfra=[]
-        unfdec=[]
-        ra=[]
-        dec=[]
+        unfra=[star.ra for star in cluster.unfilteredWide]
+        unfdec=[star.dec for star in cluster.unfilteredWide]
+        ra=[star.ra for star in cluster.filtered]
+        dec=[star.dec for star in cluster.filtered]
         
-        unfpmra=[]
-        unfpmdec=[]
-        pmra=[]
-        pmdec=[]
+        unfpmra=[star.pmra for star in cluster.unfilteredWide]
+        unfpmdec=[star.pmdec for star in cluster.unfilteredWide]
+        pmra=[star.pmra for star in cluster.filtered]
+        pmdec=[star.pmdec for star in cluster.filtered]
         
-        unfpara = []
-        para = []
+        unfpara=[star.par for star in cluster.filtered]
+        para=[star.par for star in cluster.unfilteredWide]
         
-        unfgmag=[]
-        unf_b_r=[]
-        gmag=[]
-        b_r=[]
-        ebr_ra = []
-        ebr_dec = []
-        
+        unfgmag=[star.g_mag for star in cluster.unfilteredWide]
+        unf_b_r=[star.b_r for star in cluster.unfilteredWide]
+        gmag=[star.g_mag for star in cluster.filtered]
+        b_r=[star.b_r for star in cluster.filtered]
+
         bright_b_r = [x.b_r for x in cluster.filteredBright]
         bright_gmag = [x.g_mag for x in cluster.filteredBright]
         par_b_r = [x.b_r for x in cluster.distFiltered]
         par_gmag = [x.g_mag for x in cluster.distFiltered]
         
         
-        
-        index=0
-        
-        #De-tangle star properties
-        for star in cluster.unfilteredWide:
-            
-            #Unfiltered arrays
-            unfra.append(star.ra)
-            unfdec.append(star.dec)
-            unfpmra.append(star.pmra)
-            unfpmdec.append(star.pmdec)
-            unfgmag.append(star.g_mag)
-            unf_b_r.append(star.b_r)
-            unfpara.append(star.par)
-            
-            if not np.isnan(star.e_bp_rp):
-                ebr_ra.append(star.ra)
-                ebr_dec.append(star.dec)
-            
-            
-            
-            if index < len(cluster.filtered):
-                #Put info for filtered list too
-                if star == cluster.filtered[index]:
-                    index += 1
-                    ra.append(star.ra)
-                    dec.append(star.dec)
-                    pmra.append(star.pmra)
-                    pmdec.append(star.pmdec)
-                    gmag.append(star.g_mag)
-                    b_r.append(star.b_r)
-                    para.append(star.par)
-        
-        
-        
-        #Test plots
-        if test:
-            #Color Color
-            plt.figure(f"{cluster.name}_color_color")
-            plt.xlabel('B-R')
-            plt.ylabel('B-R')
-            plt.title(f"{cluster.name} Color Color")
-            plt.scatter(unf_b_r[:],unf_b_r[:],s=0.025,c='olive')
-            plt.axis("square")
-            plt.savefig(f"{cluster.imgPath}test/{cluster.name}_color_color.pdf")
-            
-            #Wack
-            plt.figure(f"{cluster.name}_wack")
-            plt.xlabel('??')
-            plt.ylabel('??')
-            plt.title(f"{cluster.name} Wack")
-            plt.scatter([a*b for a,b in zip(unfpmra,unfpmdec)],[a*b for a,b in zip(unfra,unfdec)],s=0.025,c='olive')
-            #plt.axis("square")
-            plt.savefig(f"{cluster.imgPath}test/{cluster.name}_wack.pdf")
-            
-            #Wack2
-            plt.figure(f"{cluster.name}_wack2")
-            plt.xlabel('??')
-            plt.ylabel('??')
-            plt.title(f"{cluster.name} Wack")
-            plt.scatter([a*b for a,b in zip(unfpmra,unfpmdec)],unfpara,s=0.025,c='olive')
-            #plt.scatter([a*b for a,b in zip(pmra,pmdec)],para,s=0.025,c='midnightblue')
-            #plt.axis("square")
-            plt.savefig(f"{cluster.imgPath}test/{cluster.name}_wack2.pdf")
-            
-            #Wack3
-            plt.figure(f"{cluster.name}_wack3")
-            plt.xlabel('??')
-            plt.ylabel('??')
-            plt.title(f"{cluster.name} Wack")
-            plt.scatter([a*b for a,b in zip(unfpmra,unfpmdec)],unfpara,s=0.025,c='olive')
-            #plt.scatter([a*b for a,b in zip(pmra,pmdec)],para,s=0.025,c='midnightblue')
-            #plt.axis("square")
-            plt.savefig(f"{cluster.imgPath}test/{cluster.name}_wack3.pdf")
-        
-        
-                    
+                  
         #Position plots
         if pos:
             #Unfiltered position plot
@@ -855,16 +790,6 @@ def plot(pos=True,pm=True,cmd=True,iso=True,test=False):
             plt.scatter(ra[:],dec[:],s=0.075,c='midnightblue')
             plt.axis("square")
             plt.savefig(f"{cluster.imgPath}{cluster.name}_ra_dec_overlay.pdf")
-            
-            #Position reddening overlay
-            plt.figure(f"{cluster.name}_ra_dec_reddening_overlay")
-            plt.xlabel('RA')
-            plt.ylabel('DEC')
-            plt.title(f"{cluster.name} Reddening Overlay")
-            plt.scatter(unfra[:],unfdec[:],s=0.025,c='olive')
-            plt.scatter(ebr_ra[:],ebr_dec[:],s=0.75,c='midnightblue')
-            plt.axis("square")
-            plt.savefig(f"{cluster.imgPath}{cluster.name}_ra_dec_reddening_overlay.pdf")
             
             
         #Proper motion plots
@@ -924,8 +849,8 @@ def plot(pos=True,pm=True,cmd=True,iso=True,test=False):
             plt.xlabel('B-R')
             plt.ylabel('G Mag')
             plt.title(f"{cluster.name} Reddening")
-            plt.scatter(b_r[:],gmag[:],s=0.05,c='olive')
-            plt.scatter(b_r[:],gmag[:],s=0.05,c='midnightblue')
+            plt.scatter(b_r[:],gmag[:],s=0.05,c='olive',label='Original')
+            plt.scatter([s-cluster.reddening for s in b_r[:]],[s-cluster.reddening for s in gmag[:]],s=0.05,c='midnightblue',label='Corrected')
             plt.savefig(f"{cluster.imgPath}{cluster.name}_reddening_CMD.pdf")
             
             #Unfiltered CMD plot
@@ -962,11 +887,23 @@ def plot(pos=True,pm=True,cmd=True,iso=True,test=False):
             plt.xlabel('B-R')
             plt.ylabel('G Mag')
             plt.title(f"{cluster.name} Condensed Overlay")
-            plt.scatter([s.b_r - cluster.reddening for s in cluster.filtered],[s.g_mag - 2.1*cluster.reddening for s in cluster.filtered],s=0.05,c='olive',label='Data')
-            plt.scatter(cluster.condensed[:,0],cluster.condensed[:,1],s=5,c='midnightblue',label='Proxy Points')
-            plt.axvline(x=cluster.turnPoint[0],linestyle='--',color='midnightblue',linewidth=0.8,label='90% of Turning Point')
+            plt.scatter([s - cluster.reddening for s in b_r],[s - 2.1*cluster.reddening for s in gmag],s=0.05,c='olive',label='Data')
+            plt.scatter([s - cluster.reddening for s in cluster.condensed[:,0]],[s - 2.1*cluster.reddening for s in cluster.condensed[:,1]],s=5,c='midnightblue',label='Proxy Points')
+            plt.axvline(x=cluster.turnPoint[0] - cluster.reddening,linestyle='--',color='midnightblue',linewidth=0.8,label='95% of Turning Point')
             plt.legend()
             plt.savefig(f"{cluster.imgPath}{cluster.name}_condensed_CMD_overlay.pdf")
+            
+            #Initial Condensed CMD overlay
+            plt.figure(f"{cluster.name}_initial_condensed_CMD_overlay")
+            plt.gca().invert_yaxis()
+            plt.xlabel('B-R')
+            plt.ylabel('G Mag')
+            plt.title(f"{cluster.name} Initial Condensed Overlay")
+            plt.scatter([s - cluster.reddening for s in b_r],[s - 2.1*cluster.reddening for s in gmag],s=0.05,c='olive',label='Data')
+            plt.scatter([s - cluster.reddening for s in cluster.condensedInit[:,0]],[s - 2.1*cluster.reddening for s in cluster.condensedInit[:,1]],s=5,c='midnightblue',label='Proxy Points')
+            plt.axvline(x=cluster.turnPoint[0] - cluster.reddening,linestyle='--',color='midnightblue',linewidth=0.8,label='95% of Turning Point')
+            plt.legend()
+            plt.savefig(f"{cluster.imgPath}{cluster.name}_initial_condensed_CMD_overlay.pdf")
             
             #Brightness-PM Filtered CMD plot
             plt.figure(f"{cluster.name}_CMD_bright_filtered")
@@ -998,15 +935,19 @@ def plot(pos=True,pm=True,cmd=True,iso=True,test=False):
             plt.xlabel('B-R')
             plt.ylabel('G Mag')
             plt.title(f"{cluster.name} Isochrone Best Fit")
-            plt.scatter([s.b_r - cluster.reddening for s in cluster.filtered],[s.g_mag - 2.1*cluster.reddening for s in cluster.filtered],s=0.05,c='olive',label='Cluster')
+            plt.scatter([s - cluster.reddening for s in b_r],[s - 2.1*cluster.reddening for s in gmag],s=0.05,c='olive',label='Cluster')
             plt.plot(isochrone.br,[x+cluster.dist_mod for x in isochrone.g],c='midnightblue',label=f"{isochrone.name}")
-            plt.scatter(cluster.condensed[:,0],cluster.condensed[:,1],s=5,c='red',label='Cluster Proxy')
-            plt.legend()
+            plt.scatter([s - cluster.reddening for s in cluster.condensed[:,0]],[s - 2.1*cluster.reddening for s in cluster.condensed[:,1]],s=5,c='red',label='Cluster Proxy')
+            extra = Rectangle((0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0)
+            h,l = plt.gca().get_legend_handles_labels()
+            h.insert(0,extra)
+            l.insert(0,f"Reddening: {cluster.reddening}")
+            plt.legend(h,l)
             plt.savefig(f"{cluster.imgPath}{cluster.name}_CMD_Iso_BestFit.pdf")
 
 
 
-def specificPlot(cl,iso):
+def specificPlot(cl,iso,reddening):
     #Imports
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle
@@ -1024,9 +965,8 @@ def specificPlot(cl,iso):
         os.makedirs("SpecificPlots/png/")
     
     for chrone in cluster.iso:
-        if chrone[0].name == iso:
+        if chrone[0].name == iso and chrone[2] == reddening:
             score = chrone[1]
-            reddening = chrone[2]
             break
     
     #Isochrone CMD fit
@@ -1037,7 +977,7 @@ def specificPlot(cl,iso):
     plt.title(f"{cl} {iso}")
     plt.scatter([s.b_r for s in cluster.filtered],[s.g_mag for s in cluster.filtered],s=0.05,c='olive',label='Cluster')
     plt.plot([x + reddening for x in isochrone.br],[x+cluster.dist_mod+2.1*reddening for x in isochrone.g],c='midnightblue',label=f"Score: {score}")
-    plt.scatter(cluster.condensed0[:,0],cluster.condensed0[:,1],s=5,c=[z[2] for z in cluster.condensed],label='Cluster Proxy')
+    plt.scatter(cluster.condensed[:,0],cluster.condensed[:,1],s=5,c=cluster.condensed[:,2],label='Cluster Proxy')
     
     plt.set_cmap('brg')
     clb = plt.colorbar()
@@ -1057,7 +997,7 @@ def plotRange(cl,a,b):
     global clusters
     
     for isochrone in clusters[f"{cl}"].iso[a:b]:
-        specificPlot(cl,isochrone[0].name)
+        specificPlot(cl,isochrone[0].name,isochrone[2])
         
 def setFlag():
     #Imports
