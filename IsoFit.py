@@ -1,5 +1,10 @@
 isoIn = False
 clIn = False
+try:
+    runCount += 1
+except:
+    clusterList = []
+    runCount = 1
 
 class clusterObj:
     def __init__(self,name='genericCluster',basedir='clusters/',brightThreshold=15):
@@ -137,6 +142,14 @@ class fakeStarObj:
         self.score = 0
 
 
+class condensedPoint:
+    def __init__(self,b_r,g_mag,weight):
+        self.b_r = b_r
+        self.g_mag = g_mag
+        self.weight = weight
+
+
+
 def readClusters(clusters=["M67"],basedir="clusters/",smRad=0.35):
     #Imports
     import numpy as np
@@ -151,6 +164,9 @@ def readClusters(clusters=["M67"],basedir="clusters/",smRad=0.35):
     for clname in clusters:
         #Create cluster objects
         cluster = clusterObj(name=clname,basedir=basedir)
+        
+        if cluster.name == 'NGC752' or cluster.name == 'NGC188':
+            cluster.brightThreshold=18
         
         """
         #Generate wide-field star list
@@ -172,6 +188,7 @@ def readClusters(clusters=["M67"],basedir="clusters/",smRad=0.35):
         
         ramean = np.mean([float(x) for x in starlist[:,1]])
         decmean = np.mean([float(x) for x in starlist[:,3]])
+        
         
         for s in starlist:
             star = starObj(*s)
@@ -449,6 +466,13 @@ def turboFilter():
         cluster.filtered,cluster.mag = pmFilter(cluster.distFiltered,cluster.name)
         print(f"pm(all): {len(cluster.filtered)}")
         
+        customPlot('b_r','g_mag',cluster.name,'filtered',iso=True,square=False,color='astro_sigma5d')
+        
+        magnitude = cutNoise(cluster)
+        print(f"noise cutoff: mag {magnitude}   length {len(cluster.filtered)}")
+        
+        customPlot('b_r','g_mag',cluster.name,'filtered',iso=True,square=False,color='astro_sigma5d')
+        
         """
         for i in range(10):
             print(f"{cluster.filtered[i].b_r}   {cluster.mag[i,0]}")
@@ -461,6 +485,10 @@ def pmFilter(starList,name):
     #Imports
     import numpy as np
         
+    pmra_center = 0
+    pmdec_center = 0
+    pm_radius = 0
+    
     if name == 'M67':
         #Thresholds
         pmra_center=-11
@@ -471,6 +499,18 @@ def pmFilter(starList,name):
         pmra_center = 2.35
         pmdec_center = -2.9
         pm_radius = 0.4
+    if name == 'NGC752':
+        #Thresholds
+        pmra_center = 9.8
+        pmdec_center = -11.7
+        pm_radius = 0.5
+    if name == 'NGC188':
+        #Thresholds
+        pmra_center = -2.3
+        pmdec_center = -1
+        pm_radius = 0.4
+    
+    assert not pm_radius == 0
     
     filtered = []
     mag = np.empty((0,2))
@@ -495,8 +535,28 @@ def distFilter(cluster):
 
 
 
+def cutNoise(cluster):
+    #Imports
+    import numpy as np
+    
+    stars = sorted(cluster.filtered,key=lambda x: x.g_mag)
+    new = []
+    newMag = np.empty((0,2))
+    
+    threshold = 0.5
+    
+    for i,s in enumerate(stars):
+        if s.astro_sigma5d > threshold:
+            break
+        new.append(s)
+        newMag = np.r_[newMag,[[s.b_r,s.g_mag]]]
+        
+    cluster.filtered = new
+    cluster.mag = newMag
+    return i
 
-def turboFit(method='pos'):
+
+def turboFit(method='pos',minScore=0.001):
     #Imports
     import numpy as np
     from sys import stdout
@@ -504,7 +564,6 @@ def turboFit(method='pos'):
     from time import sleep
     global clusterList
     
-    redList = [round(x,2) for x in np.arange(0,1.01,0.05)]
     
     t0 = time.time()
     
@@ -513,9 +572,19 @@ def turboFit(method='pos'):
     for cluster in clusterList:
         cluster.iso = []
         
+        redCenter = np.nanmedian([x.e_bp_rp for x in cluster.filtered])
+        redMin = redCenter - 0.2
+        redMax = redCenter + 0.2
+        step = 0.01
+        
+        if redMin < 0:
+            redMin = 0
+        
+        redList = [round(x,2) for x in np.arange(redMin,redMax+step,step)]
+        
         for reddening in redList:
-            stdout.write(f"\rCurrent reddening value for {cluster.name}: {reddening} / {redList[-1]}")
-            shapeFit(cluster,reddening)
+            stdout.write(f"\rCurrent reddening value for {cluster.name}: {reddening:.2f} / {redList[-1]:.2f}")
+            shapeFit(cluster,reddening,minScore)
             stdout.flush()
             sleep(0.1)
         
@@ -534,7 +603,7 @@ def turboFit(method='pos'):
             
 
 
-def shapeFit(cluster,reddening):
+def shapeFit(cluster,reddening,minScore):
     #Imports
     import numpy as np
     import shapely.geometry as geom
@@ -548,10 +617,13 @@ def shapeFit(cluster,reddening):
         isoLine = geom.LineString(tuple(zip([x+reddening for x in iso.br],[x+cluster.dist_mod+conversion*reddening for x in iso.g])))
         dist = []
         for star in cluster.condensed:
-            starPt = geom.Point(star[0],star[1])
+            starPt = geom.Point(star.b_r,star.g_mag)
             #print(starPt.distance(isoLine))
-            dist.append(np.abs(starPt.distance(isoLine))/star[2])
-        isoScore = np.mean(dist[:])
+            pointDist = np.abs(starPt.distance(isoLine))*star.weight
+            if pointDist < minScore*star.weight:
+                pointDist = minScore*star.weight
+            dist.append(pointDist**2)
+        isoScore = np.sum(dist[:])
         #print(isoScore,dist)
         #print(list(geom.shape(isoLine).coords))
         isoFitList = np.r_[isoFitList,[[iso,isoScore,reddening]]]
@@ -559,6 +631,9 @@ def shapeFit(cluster,reddening):
         #print(isoScore)
     cluster.iso.extend(isoFitList)
     cluster.iso = sorted(cluster.iso,key=lambda x: x[1])
+    best = cluster.iso[1][0]
+    #specificPlot(cluster.name,best.name,reddening)
+    print(f"\nFirst point of best fit: {best.br[0]+reddening},{best.g[0]+conversion*reddening+cluster.dist_mod}")
     
     
 
@@ -603,6 +678,8 @@ def condense(method):
         
         condensed = condensed[::-1]
         
+        #Original turning point method
+        """
         #Find Turning Point
         counts=[]
         for i,point1 in enumerate(condensed):
@@ -616,26 +693,56 @@ def condense(method):
             counts.append(count)
             if not (total == 0) and not (count == 0):
                 turnPoints.append([point1[0],point1[1],count])
-        
         """
+        
+        #New turning point method
+        start = 4
+        end = 11
+        theta_crit = 5
+        
+        basex = [a[0] for a in condensed[start:end]]
+        basey = [a[1] for a in condensed[start:end]]
+        base = np.polyfit(basex,basey,1)
+        
+        for i,point in enumerate(condensed):
+            if i == start:
+                continue
+            x = [point[0],condensed[start,0]]
+            y = [point[1],condensed[start,1]]
+            lin = np.polyfit(x,y,1)
+            
+            point[2] = 180/np.pi*np.arctan(abs( (base[0]-lin[0])/(1+base[0]*lin[0]) ))
+            
+            if point[2] > theta_crit and i > end:
+                turnPoints.append(point)
+            
+
         #Analysis Plot
         import matplotlib.pyplot as plt
         plt.figure()
-        plt.scatter(condensed[:,0],condensed[:,1],c=counts)
+        plt.scatter(condensed[:,0],condensed[:,1],c=condensed[:,2])
         plt.set_cmap('brg')
+        plt.gca().invert_yaxis()
         clb = plt.colorbar()
-        """
-        
+        clb.ax.set_title("Theta")
+        plt.savefig(f'condensed_{cluster.name}')
+
         
         if len(turnPoints) == 0:
             print("No turning point identified for {cluster.name}")
             return
         else:
-            turnPoints = sorted(turnPoints,key=lambda x: x[2])
+            turnPoints = sorted(turnPoints,key=lambda x: x[1])
             tp = turnPoints[-1]
             tp[0] = tp[0] - 0.05*np.abs(tp[0])
             cluster.turnPoint = tp
-            cluster.condensedInit = condensed
+            
+            cl = []
+            for point in condensed:
+                cl.append(condensedPoint(point[0],point[1],point[2]))
+            
+            cluster.condensedInit = cl
+            #                                     [ B-R , G , Theta ]
             print(f"{cluster.name} Turning Point: {cluster.turnPoint}")
         
         
@@ -674,12 +781,13 @@ def condense(method):
                 break
         assert not index == 0
         
+        #Fit weight parameters
         N = len(condensed)
-        alpha = 0.1
+        alpha = 0.5
         beta = 10
         c = alpha + 1
         
-        index = index - 5
+        index = index - 7
         
         for i,point in enumerate(condensed):
             #point[2] = 5/(1+np.abs(index-i))
@@ -688,6 +796,12 @@ def condense(method):
             
         
         condensed = condensed[::-1]
+        
+        cl = []
+        for point in condensed:
+            cl.append(condensedPoint(point[0],point[1],point[2]))
+        
+        condensed = cl
         
         if cluster.reddening == 0:
             cluster.condensed0 = condensed
@@ -848,7 +962,7 @@ def plot(cl=clusterList,pos=True,pm=True,cmd=True,iso=True,test=False):
             plt.gca().invert_yaxis()
             plt.xlabel('B-R')
             plt.ylabel('G Mag')
-            plt.title(f"{cluster.name} Reddening")
+            plt.title(f"{cluster.name} Reddening = {cluster.reddening:.2f}")
             plt.scatter(b_r[:],gmag[:],s=0.05,c='olive',label='Original')
             plt.scatter([s-cluster.reddening for s in b_r[:]],[s-cluster.reddening for s in gmag[:]],s=0.05,c='midnightblue',label='Corrected')
             plt.savefig(f"{cluster.imgPath}{cluster.name}_reddening_CMD.pdf")
@@ -888,10 +1002,26 @@ def plot(cl=clusterList,pos=True,pm=True,cmd=True,iso=True,test=False):
             plt.ylabel('G Mag')
             plt.title(f"{cluster.name} Condensed Overlay")
             plt.scatter([s - cluster.reddening for s in b_r],[s - 2.1*cluster.reddening for s in gmag],s=0.05,c='olive',label='Data')
-            plt.scatter([s - cluster.reddening for s in cluster.condensed[:,0]],[s - 2.1*cluster.reddening for s in cluster.condensed[:,1]],s=5,c='midnightblue',label='Proxy Points')
+            plt.scatter([s.b_r - cluster.reddening for s in cluster.condensed],[s.g_mag - 2.1*cluster.reddening for s in cluster.condensed],s=5,c='midnightblue',label='Proxy Points')
             plt.axvline(x=cluster.turnPoint[0] - cluster.reddening,linestyle='--',color='midnightblue',linewidth=0.8,label='95% of Turning Point')
             plt.legend()
             plt.savefig(f"{cluster.imgPath}{cluster.name}_condensed_CMD_overlay.pdf")
+            
+            #Weighted CMD overlay
+            plt.figure(f"{cluster.name}_weighted_CMD_overlay")
+            plt.gca().invert_yaxis()
+            plt.xlabel('B-R')
+            plt.ylabel('G Mag')
+            plt.title(f"{cluster.name} Weighted Overlay")
+            plt.scatter([s - cluster.reddening for s in b_r],[s - 2.1*cluster.reddening for s in gmag],s=0.05,c='olive',label='Data')
+            plt.scatter([s.b_r - cluster.reddening for s in cluster.condensed],[s.g_mag - 2.1*cluster.reddening for s in cluster.condensed],s=5,c=[s.weight for s in cluster.condensed],label='Proxy Points')
+            plt.axvline(x=cluster.turnPoint[0] - cluster.reddening,linestyle='--',color='midnightblue',linewidth=0.8,label='95% of Turning Point')
+            plt.set_cmap('brg')
+            clb = plt.colorbar()
+            clb.ax.set_title("Weight")
+            plt.legend()
+            plt.savefig(f"{cluster.imgPath}{cluster.name}_weighted_CMD_overlay.pdf")
+            
             
             #Initial Condensed CMD overlay
             plt.figure(f"{cluster.name}_initial_condensed_CMD_overlay")
@@ -900,7 +1030,7 @@ def plot(cl=clusterList,pos=True,pm=True,cmd=True,iso=True,test=False):
             plt.ylabel('G Mag')
             plt.title(f"{cluster.name} Initial Condensed Overlay")
             plt.scatter([s - cluster.reddening for s in b_r],[s - 2.1*cluster.reddening for s in gmag],s=0.05,c='olive',label='Data')
-            plt.scatter([s - cluster.reddening for s in cluster.condensedInit[:,0]],[s - 2.1*cluster.reddening for s in cluster.condensedInit[:,1]],s=5,c='midnightblue',label='Proxy Points')
+            plt.scatter([s.b_r - cluster.reddening for s in cluster.condensedInit],[s.g_mag - 2.1*cluster.reddening for s in cluster.condensedInit],s=5,c='midnightblue',label='Proxy Points')
             plt.axvline(x=cluster.turnPoint[0] - cluster.reddening,linestyle='--',color='midnightblue',linewidth=0.8,label='95% of Turning Point')
             plt.legend()
             plt.savefig(f"{cluster.imgPath}{cluster.name}_initial_condensed_CMD_overlay.pdf")
@@ -937,7 +1067,7 @@ def plot(cl=clusterList,pos=True,pm=True,cmd=True,iso=True,test=False):
             plt.title(f"{cluster.name} Isochrone Best Fit")
             plt.scatter([s - cluster.reddening for s in b_r],[s - 2.1*cluster.reddening for s in gmag],s=0.05,c='olive',label='Cluster')
             plt.plot(isochrone.br,[x+cluster.dist_mod for x in isochrone.g],c='midnightblue',label=f"{isochrone.name}")
-            plt.scatter([s - cluster.reddening for s in cluster.condensed[:,0]],[s - 2.1*cluster.reddening for s in cluster.condensed[:,1]],s=5,c='red',label='Cluster Proxy')
+            plt.scatter([s.b_r - cluster.reddening for s in cluster.condensed],[s.g_mag - 2.1*cluster.reddening for s in cluster.condensed],s=5,c='red',label='Cluster Proxy')
             extra = Rectangle((0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0)
             h,l = plt.gca().get_legend_handles_labels()
             h.insert(0,extra)
@@ -977,7 +1107,7 @@ def specificPlot(cl,iso,reddening):
     plt.title(f"{cl} {iso}")
     plt.scatter([s.b_r for s in cluster.filtered],[s.g_mag for s in cluster.filtered],s=0.05,c='olive',label='Cluster')
     plt.plot([x + reddening for x in isochrone.br],[x+cluster.dist_mod+2.1*reddening for x in isochrone.g],c='midnightblue',label=f"Score: {score}")
-    plt.scatter(cluster.condensed[:,0],cluster.condensed[:,1],s=5,c=cluster.condensed[:,2],label='Cluster Proxy')
+    plt.scatter([s.b_r for s in cluster.condensed],[s.g_mag for s in cluster.condensed],s=5,c=[s.weight for s in cluster.condensed],label='Cluster Proxy')
     
     plt.set_cmap('brg')
     clb = plt.colorbar()
@@ -1026,7 +1156,7 @@ def customPlot(var1,var2,cluster,mode,iso=False,square=True,color='default',titl
         starlistF = clusters[f"{cluster}"].filtered
     
     
-    plt.figure(f"customPlot_{var1}_{var2}_{color}")
+    plt.figure()
     if title == 'default':
         plt.title(f"Custom Plot {var1} {var2} {color}")
     else:
@@ -1058,4 +1188,31 @@ def customPlot(var1,var2,cluster,mode,iso=False,square=True,color='default',titl
     plt.savefig(f"SpecificPlots/pdf/Custom_Plot_{var1}_{var2}.pdf")
     plt.savefig(f"SpecificPlots/png/Custom_Plot_{var1}_{var2}.png")
         
+
+def splitMS(clname='M67',slope=3,offset=12.2):
+    #Imports
+    import numpy as np
+    import matplotlib.pyplot as plt
+    
+    cluster = clusters[clname]
+    
+    xlist = [s.b_r for s in cluster.filtered]
+    ylist = [s.g_mag for s in cluster.filtered]
+    
+    x = np.linspace(1,2,100)
+    
+    
+    plt.figure()
+    plt.title('Main sequence Spread')
+    plt.xlabel('B-R')
+    plt.ylabel('G Mag')
+    plt.scatter(xlist,ylist,s=0.05,c='olive',label='Filtered Star Data')
+    plt.plot(x,[slope*a + offset for a in x],color='midnightblue',label='Main Sequence')
+    plt.plot(x,[slope*a + offset - 0.75 for a in x],'--',color='midnightblue',label='MS shifted 0.75 mag')
+    plt.xlim(0.6,2.2)
+    plt.ylim(13,19)
+    plt.legend()
+    plt.gca().invert_yaxis()
+    plt.savefig(f"{clname}_MS_Spread.png")
+    plt.savefig(f"{clname}_MS_Spread.pdf")
 
