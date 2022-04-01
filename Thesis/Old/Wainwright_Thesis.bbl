@@ -1,0 +1,54 @@
+\begin{thebibliography}{10}
+
+\bibitem{ESA}
+{{European Space Agency}},
+\newblock Gaia mission summary,
+\newblock
+  \href{http://sci.esa.int/gaia/28820-summary/}{http://sci.esa.int/gaia/28820-summary/}.
+
+\bibitem{GaiaSpec}
+{{European Space Agency}},
+\newblock Inside gaia's billion pixel camera,
+\newblock
+  \href{http://sci.esa.int/gaia/53281-inside-gaia-s-billion-pixel-camera/}{http://sci.esa.int/gaia/53281-inside-gaia-s-billion-pixel-camera/}.
+
+\bibitem{GaiaData}
+{{European Space Agency}},
+\newblock Gaia archive - data release 2,
+\newblock
+  \href{https://gea.esac.esa.int/archive/}{https://gea.esac.esa.int/archive/}.
+
+\bibitem{Isochrones}
+A.~Dotter,
+\newblock Dartmouth stellar evolution database,
+\newblock
+  \href{http://stellar.dartmouth.edu/models/}{http://stellar.dartmouth.edu/models/}.
+
+\bibitem{gaiaTable}
+{Gaia Collaboration} {\em et~al.},
+\newblock Astronomy \& Astrophysics {\bf 616}, A1 (2018), arXiv:1804.09365.
+
+\bibitem{simbad}
+{{Université de Strasbourg}},
+\newblock {{SIMBAD Astronomical Database}},
+\newblock
+  \href{http://simbad.u-strasbg.fr/simbad/}{http://simbad.u-strasbg.fr/simbad/}.
+
+\bibitem{p1}
+J.~Wang, J.~Ma, Z.~Wu, S.~Wang, and X.~Zhou,
+\newblock The Astronomical Journal {\bf 150}, 61 (2015).
+
+\bibitem{p2}
+L.~M. {Hobbs}, J.~A. {Thorburn}, and T.~{Rodriguez-Bell},
+\newblock The Astronomical Journal {\bf 100}, 710 (1990).
+
+\bibitem{p3}
+B.~J. {Anthony-Twarog} {\em et~al.},
+\newblock The Astronomical Journal {\bf 156}, 37 (2018), arXiv:1806.04112.
+
+\bibitem{p4}
+Q.~{Sun}, C.~P. {Deliyannis}, B.~A. {Twarog}, B.~J. {Anthony-Twarog}, and
+  A.~{Steinhauer},
+\newblock arXiv e-prints , arXiv:2004.10902 (2020), arXiv:2004.10902.
+
+\end{thebibliography}
