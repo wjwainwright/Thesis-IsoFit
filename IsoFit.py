@@ -3335,12 +3335,34 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     #plt.gca().add_patch(outline3)
     plt.legend(fontsize=10,loc='upper right')
     plt.axis('square')
-    plt.xlabel("RA (deg)")
+    plt.xlabel("RA (Deg)")
     plt.ylabel("DEC (Deg)")
     plt.title(f"{clname} {mode.capitalize()} Characteristic Radius")
     plt.gcf().set_size_inches(8,8)
     plt.savefig(f"{cluster.imgPath}{clname}_radialMembership_{mode}.pdf")
     plt.savefig(f"{cluster.imgPath}png/{clname}_radialMembership_{mode}.png",dpi=500)
+    
+    if "M67" in clname and mode == "filtered":
+        plt.figure(f"{clname}_rings_{mode}")
+        plt.scatter([star.ra for star in cluster.unfilteredWide],[star.dec for star in cluster.unfilteredWide],s=0.5,c='lightgray',label='Unfiltered')
+        plt.scatter([star.ra for star in cluster.filtered],[star.dec for star in cluster.filtered],s=1,c='midnightblue',label='Filtered')
+        
+        for i in range(0,len(rings)):
+            outline = Circle([x0,y0],rings[i],color='red',fill=False)
+            plt.gca().add_patch(outline)
+        
+        plt.legend(fontsize=10,loc='upper right')
+        plt.axis('square')
+        plt.xlabel("RA (Deg)")
+        plt.ylabel("DEC (Deg)")
+        plt.title(f"{clname} Radial Bins")
+        plt.gcf().set_size_inches(8,8)
+        plt.savefig(f"SpecificPlots/pdf/{clname}_radialBins.pdf")
+        plt.savefig(f"SpecificPlots/png/{clname}_radialBins.png",dpi=500)
+        plt.xlim(132.7,133)
+        plt.ylim(11.67,11.97)
+        plt.savefig(f"SpecificPlots/pdf/{clname}_radialBins_center.pdf")
+        plt.savefig(f"SpecificPlots/png/{clname}_radialBins_center.png",dpi=500)
     
     
     #========= Stars by Mass =========

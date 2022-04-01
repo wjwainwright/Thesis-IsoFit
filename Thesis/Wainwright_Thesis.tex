@@ -56,14 +56,14 @@
 \begin{document}
 
 
-\title{Delving into population statistics of open clusters with Gaia
-\footnote{Completed as part of the thesis requirement for the Rochester Institute of Technology's AST Master's program.}}
+%\title{Delving into population statistics of open clusters with Gaia
+%\footnote{Completed as part of the thesis requirement for the Rochester Institute of Technology's Astrophysical Science and Technology Master's program.}}
 
-\author{William J. Wainwright}
-\affiliation{Rochester Institute of Technology}
+%\author{William J. Wainwright}
+%\affiliation{Rochester Institute of Technology}
 
-\author[0000-0002-7676-8302]{Michael Richmond}
-\affiliation{Rochester Institute of Technology}
+%\author[0000-0002-7676-8302]{Michael Richmond}
+%\affiliation{Rochester Institute of Technology}
 \begin{abstract}
 
 Stellar clusters provide a unique look into the populations of stars in our galaxy through different slices of time. The evolution of a population of stars is highly subject to initial conditions, and as such, through careful observation and rigorous analysis, one can infer those initial conditions from the comparison to models. In this work, we present our methods and findings on the process of filtering, fitting, and statistical analysis of 16 nearby open clusters. For each cluster, we have confidently identified cluster members before fitting thousands of permutations of synthetic isochrones and color excess to determine the best fit. We summarize the ages, metallicities, membership counts, and interstellar reddening of these open clusters. Additionally, we analyze the surface density and average mass drop-off of each cluster. Finally, we delve into the population statistics of open clusters in the Milky way, showing correlations such as mean cluster mass as a function of age, and more.
@@ -71,11 +71,11 @@ Stellar clusters provide a unique look into the populations of stars in our gala
 
 
 \end{abstract}
-\keywords{Gaia --- Isochrones --- Open Clusters --- Population Statistics}
-
-\newpage
+%\keywords{Gaia --- Isochrones --- Open Clusters --- Population Statistics}
+\clearpage
 \tableofcontents
-\newpage
+\clearpage
+
 
 \section{Introduction} \label{sec:intro}
 
@@ -348,7 +348,21 @@ Many attempts were made to bridge this process, which is relatively well suited 
 
 With a filtered and isochrone-fit data set for each cluster, one of the key areas of interest that we explored was the density profiles of clusters. The main measurements needed to look at density profiles are the right ascension, declination, and parallax. Though the parallax measurements from Gaia come with impressively small uncertainties, the proportional error still makes accurate 3D mapping of dense clusters at high distances difficult. For example, we determined the cluster M67 to have a half-light radius of around 3 parsecs. However, the average cluster member of M67 has an uncertainty in parallax distance of order 20 parsecs. As such, in order to get the most precise radial membership profiles, we have gone with a 2D projected sky map model. The parallax measurements for stars identified as cluster members are flattened to the mean for the cluster, and their distance from the cluster center is calculated purely from measurements of right ascension and declination. We recognize that this has the disadvantage of potential inaccuracies in the mapping of non-uniformly dispersed clusters, but the uncertainty in parallax for distant clusters was too high to accurately project a 3D membership profile.
 
-With a projected sky map in mind, the data was then sorted into radial bins, typically $N=100$, which form concentric rings around the cluster center. These rings are spaced equally in the RA, spanning the region from the center of the cluster to the furthest identified member. The center of the cluster is identified as the mean RA and DEC position of the filtering-identified cluster members. A small region in the center of these concentric radial bins, roughly the inner 5\% by radius, is excluded from any calculations in order to prevent overestimation of density given an exceedingly small effective area. Another deliberate adjustment is the over weighting of the central regions of the cluster. Of the total $N$ bins spanning the search area of radius $R$, $\frac{N}{2}$ or half of the radial bins lie within the inner $\frac{R}{4}$. This bias in the distribution of bin density was chosen to provide finer resolution in the center of the search region, since the search region tends to include a far wider area than what would be identified as the cluster by eye. While this only $\frac{R}{4}$ selection only represents $6.25\%$ of the total search region by area, we have observed that in the case of most open clusters, the density drops off to a near constant within a small portion of $R$. This observation also further motivated the functions we use to represent cluster density.
+With a projected sky map in mind, the data was then sorted into radial bins, typically $N=100$, which form concentric rings around the cluster center. These rings are spaced equally in the RA, spanning the region from the center of the cluster to the furthest identified member. The center of the cluster is identified as the mean RA and DEC position of the filtering-identified cluster members. A small region in the center of these concentric radial bins, roughly the inner 5\% by radius, is excluded from any calculations in order to prevent overestimation of density given an exceedingly small effective area. Another deliberate adjustment is the over weighting of the central regions of the cluster. Of the total $N$ bins spanning the search area of radius $R$, $\frac{N}{2}$ or half of the radial bins lie within the inner $\frac{R}{4}$. This bias in the distribution of bin density was chosen to provide finer resolution in the center of the search region, since the search region tends to include a far wider area than what would be identified as the cluster by eye. While this only $\frac{R}{4}$ selection only represents $6.25\%$ of the total search region by area, we have observed that in the case of most open clusters, the density drops off to a near constant within a small portion of $R$. This observation also further motivated the functions we use to represent cluster density. A visualization of the separation of the bins, both in the central and external regions of the cluster, can be seen in Figures \ref{fig:radBins} \& \ref{fig:radBinsCenter}.
+
+\begin{figure}[]
+    \centering
+      \includegraphics[width=4.75in]{figures/M67_radialBins.png}
+    \caption{Demonstration of the spacing of the radial bins used in the number density and mass density calculations. The filtered and unfiltered data for Messier 67 is included for reference.}
+    \label{fig:radBins}
+\end{figure}
+
+\begin{figure}[]
+    \centering
+      \includegraphics[width=4.75in]{figures/M67_radialBins_center.png}
+    \caption{Demonstration of the spacing of the radial bins in the central region of the cluster. The inner $\frac{R}{4}$ by radius includes 50\% of the total radial bins. The filtered and unfiltered data for Messier 67 is included for reference.}
+    \label{fig:radBinsCenter}
+\end{figure}
 
 With radial bins selected, the number of cluster members identified in each ring is then divided by the area of the ring in square degrees to yield a surface number density. The surface number density bins are analyzed for extreme and erroneous outliers, usually manifesting as an increase or decrease between bins greater than three times that of the neighboring bins. Radial bins whose number density falls below a minimum threshold are also discarded. The result of this process is shown for example in Figure \ref{fig:M67_num_density}. In addition to the resulting surface number density in each bin, Figure \ref{fig:M67_num_density} shows the best fit density profile to the data. The shape of this profile was chosen from the spatial distribution in King 1972\protect{\cite{King_1972}}, shown in Equation \ref{eq:king}. In this model, K represents a central core density, and R represents a characteristic cluster core radius. The result of fitting this type of profile to the data is that a characteristic cluster core radius can be determined for each cluster, allowing direct quantitative comparisons of cluster size. In the past, we also attempted to fit the surface density data using an exponential decay model. This model also produced a characteristic radius for the cluster, but did not fit the surface density profiles of all clusters equally well.
 
@@ -573,11 +587,23 @@ Future work and improvements for this project fall into a few categories, the fi
 
 Another primary avenue of improvement comes from a more robust filtering process, affecting the quality of end statistics, the efficiency of studying new clusters, and the ability to sample more clusters. Open clusters that lie in the plane of the galaxy, especially those with a lower stellar density, are prone to high fractions of line of sight contamination by non-cluster members. Gaia DR3 promises to bring radial velocity measurements to many more stars, potentially adding an extra dimension along which to identify cluster members. In addition, we think that the problem of identifying a boundary between cluster members and non-members as a function of multiple measurements is a task perfectly suited for several types of machine learning. As such, a combination of more information and a hands-on machine learning approach is something we'd consider to be a strong candidate for future improvement.
 
+Another way of improving the filtering and cluster membership identification process is by adding more data. Radial velocity measurements would be likely to help increase our confidence in the final list of candidate cluster members. Given how important proper motion is in the filtering process, radial velocity measurements would quite literally add a whole new dimension. Gaia's full Data Release 3 is said to include radial velocity measurements for many more stars, though it is still possible that many potential cluster members will be lacking measurements. As such, if we are looking to further refine the filtering process, it makes sense to include other outside observations, including radial velocities and spectra, for some or all stars in a given cluster.
+
 An area of future interest is closer analysis of the unresolved binary populations of open clusters. As mentioned in Section \ref{sec:dataUse}, many well filtered open clusters present a clear binary sequence. The best candidate cluster for this type of study would be Messier 67. In addition to have a low rate of non-member contamination and next to zero interstellar reddening, M67 demonstrates a clear binary sequence. While comparing the fractions of binary cluster members across different open clusters is not widely possible, owing to the lack of a clear binary sequence in some clusters, the well-filtered CMDs of clusters that do present clear binary sequences identify hundreds of unresolved binary candidates for further study using other surveys. Identifying the relative binary fraction in various open clusters would also allow for comparison to theory on binary formation and frequency as a function of other properties.
 
 The extension of the methods and findings in this work to the Milky Way's population of globular clusters is something else we would like to include in future versions of this work. The primary reasons we are unable to delve into globular cluster population statistics currently are difficulties in the filtering and fitting procedures. Difficulties in the filtering process of globular clusters are ones that we hoped to see resolved by exploration of the aforementioned machine learning based filtering techniques. As for the ability to fit synthetic isochrones to the CMDs of globular clusters, it is something that we already posses the capability to do and have done for a handful of cases, but the ages given by best-fitting isochrones are nonphysical.
 
 Finally, the most obvious and expected continuation of this work is to continue to process additional open clusters to increase the sample size and further refine the conclusions drawn in Section \ref{sec:pop}. Many of the trends and correlations observed and speculated in that section rely on a handful of points to draw a conclusion. While we assert that 15 open clusters is reaching the point of being statistically significant enough to start drawing conclusions, we would in no way turn down the opportunity to double or triple that number, even if it disproves any of our asserted findings. Gaia could resolve upwards of 5-7 times the number of open clusters included in this work, but the sampling of clusters over 2 Gyr is mostly limited to those sampled in this work. We hope that at the very least, the methods and preliminary findings of this work help to pave future interest and work on the subject of delving into open stellar cluster population statistics.
+
+\section{Acknowledgments}
+I would like to thank Michael Richmond for his sage advice and guidance throughout the project, and his guidance as my advisor. I would also like to thank Joel Kastner for his insights and knowledge on young stellar clusters and main sequence tracks. Finally, I would like to thank RIT and the AST program in the School of Physics and Astronomy. Many of the faculty not individually named have been helpful to me in various stages of this research, and I would not have been able to complete this work without them.
+
+This work has made use of data from the European Space Agency (ESA) mission
+{\it Gaia} (\url{https://www.cosmos.esa.int/gaia}), processed by the {\it Gaia}
+Data Processing and Analysis Consortium (DPAC,
+\url{https://www.cosmos.esa.int/web/gaia/dpac/consortium}). Funding for the DPAC
+has been provided by national institutions, in particular the institutions
+participating in the {\it Gaia} Multilateral Agreement.
 
 \bibliography{Wainwright_Thesis}{}
 \nocite{*}
