@@ -3619,12 +3619,14 @@ def refreshProperties(cList=['all']):
         
         print(f"{cluster.name} properties refreshed from catalogue")
 
+
     
 
 def statPlot(statX,statY,population="open",color="default",square=True,invertY=False,logX=False,logY=False,pointLabels=True,linFit=False,directory='default'):
     #Create plots of stat X vs stat Y across a population of clusters, similar to customPlot()
     #Can be set to use a custom list of clusters, or all clusters of a given type
-    #Imports
+    #
+    import matplotlib
     import matplotlib.pyplot as plt
     import numpy as np
     from scipy.stats import linregress
@@ -3675,23 +3677,30 @@ def statPlot(statX,statY,population="open",color="default",square=True,invertY=F
     if statX.lower() == "b_r" and statY.lower() == "g_mag":
         #Corrected CMD overlay
         
+        NUM_COLORS = len(cList)
+        cm = plt.get_cmap('nipy_spectral')
+        
+        
         plt.figure("uncorrected")
         plt.title("Cluster Overlay")
         plt.xlabel("Observed B-R")
         plt.ylabel("Apparent G Mag")
         plt.gca().invert_yaxis()
+        plt.gca().set_prop_cycle('color', [cm(1.025*i/NUM_COLORS) for i in range(NUM_COLORS)])
         
         plt.figure("unshifted")
         plt.title("Corrected Cluster Overlay")
         plt.xlabel("Dereddened B-R")
         plt.ylabel("Absolute G Mag")
         plt.gca().invert_yaxis()
+        plt.gca().set_prop_cycle('color', [cm(1.025*i/NUM_COLORS) for i in range(NUM_COLORS)])
         
         plt.figure("shifted")
         plt.title("Corrected Cluster Overlay - Offset")
         plt.xlabel("Dereddened B-R")
         plt.ylabel("Absolute G Mag")
         plt.gca().invert_yaxis()
+        plt.gca().set_prop_cycle('color', [cm(1.025*i/NUM_COLORS) for i in range(NUM_COLORS)])
         
         index = 0
         offset = 2.5
@@ -3718,20 +3727,18 @@ def statPlot(statX,statY,population="open",color="default",square=True,invertY=F
             plt.scatter(x1,y1,label=f"{cluster.name}")
             
             plt.figure("unshifted")
-            # plt.axvline(x=0.95,color='black',linestyle='--')
             plt.axvline(x=1.6,ymax=0.5,color='black',linestyle='--')
             plt.axhline(y=4,xmin=0.59,color='black',linestyle='--')
             plt.scatter(x2,y2,label=f"{cluster.name}")
             
             plt.figure("shifted")
             plt.scatter(x3,y3,label=f"{cluster.name}")
-            # plt.axvline(x=0.95,color='black',linestyle='--')
             plt.axvline(x=1.6,color='black',linestyle='--')
             
-            if 'NGC2301' in cluster.name:
-                for a,b in zip(x2,y2):
-                    print(f"{a},{b}")
-            
+            # if 'NGC2301' in cluster.name:
+            #     for a,b in zip(x2,y2):
+            #         print(f"{a},{b}")
+        
         
         plt.figure("uncorrected")
         plt.legend(fontsize=10,loc='upper right')

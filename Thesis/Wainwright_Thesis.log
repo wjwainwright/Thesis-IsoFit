@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2018.10.20)  1 APR 2022 18:58
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2018.10.20)  5 APR 2022 16:58
 entering extended mode
 **./Wainwright_Thesis.tex
 (Wainwright_Thesis.tex
@@ -742,90 +742,90 @@ LaTeX Font Info:    Font shape `U/lasy/b/n' in size <5> not available
  [2]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 111.
+               Default added (so using `tbp') on input line 116.
 
 LaTeX Font Info:    Font shape `U/lasy/b/n' in size <9> not available
-(Font)              Font shape `U/lasy/m/n' tried instead on input line 114.
+(Font)              Font shape `U/lasy/m/n' tried instead on input line 119.
 LaTeX Font Info:    Font shape `U/lasy/b/n' in size <6> not available
-(Font)              Font shape `U/lasy/m/n' tried instead on input line 114.
+(Font)              Font shape `U/lasy/m/n' tried instead on input line 119.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 158.
+               Default added (so using `tbp') on input line 163.
 
-<figures/M67_pm_unfiltered.png, id=117, 462.528pt x 346.896pt>
+<figures/M67_pm_unfiltered.png, id=118, 462.528pt x 346.896pt>
 File: figures/M67_pm_unfiltered.png Graphic file (type png)
 <use figures/M67_pm_unfiltered.png>
-Package pdftex.def Info: figures/M67_pm_unfiltered.png  used on input line 160.
+Package pdftex.def Info: figures/M67_pm_unfiltered.png  used on input line 165.
 
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 [3] [4]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 171.
+               Default added (so using `tbp') on input line 176.
 
-<figures/M67_cmd_unfiltered.png, id=140, 462.528pt x 346.896pt>
+<figures/M67_cmd_unfiltered.png, id=141, 462.528pt x 346.896pt>
 File: figures/M67_cmd_unfiltered.png Graphic file (type png)
 <use figures/M67_cmd_unfiltered.png>
-Package pdftex.def Info: figures/M67_cmd_unfiltered.png  used on input line 173
+Package pdftex.def Info: figures/M67_cmd_unfiltered.png  used on input line 178
 .
 (pdftex.def)             Requested size: 325.215pt x 243.92122pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 183.
+               Default added (so using `tbp') on input line 188.
 
-<figures/M35_cmd_unfiltered.png, id=146, 462.528pt x 346.896pt>
+<figures/M35_cmd_unfiltered.png, id=147, 462.528pt x 346.896pt>
 File: figures/M35_cmd_unfiltered.png Graphic file (type png)
 <use figures/M35_cmd_unfiltered.png>
-Package pdftex.def Info: figures/M35_cmd_unfiltered.png  used on input line 185
+Package pdftex.def Info: figures/M35_cmd_unfiltered.png  used on input line 190
 .
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 190.
+               Default added (so using `tbp') on input line 195.
 
-<figures/M35_cmd_bright_filtered.png, id=147, 462.528pt x 346.896pt>
+<figures/M35_cmd_bright_filtered.png, id=148, 462.528pt x 346.896pt>
 File: figures/M35_cmd_bright_filtered.png Graphic file (type png)
 <use figures/M35_cmd_bright_filtered.png>
 Package pdftex.def Info: figures/M35_cmd_bright_filtered.png  used on input lin
-e 192.
+e 197.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 197.
+               Default added (so using `tbp') on input line 202.
 
-<figures/M35_cmd_parallax_filtered.png, id=150, 462.528pt x 346.896pt>
+<figures/M35_cmd_parallax_filtered.png, id=151, 462.528pt x 346.896pt>
 File: figures/M35_cmd_parallax_filtered.png Graphic file (type png)
 <use figures/M35_cmd_parallax_filtered.png>
 Package pdftex.def Info: figures/M35_cmd_parallax_filtered.png  used on input l
-ine 199.
+ine 204.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 204.
+               Default added (so using `tbp') on input line 209.
 
-<figures/M35_cmd_filtered.png, id=153, 462.528pt x 346.896pt>
+<figures/M35_cmd_filtered.png, id=154, 462.528pt x 346.896pt>
 File: figures/M35_cmd_filtered.png Graphic file (type png)
 <use figures/M35_cmd_filtered.png>
-Package pdftex.def Info: figures/M35_cmd_filtered.png  used on input line 206.
+Package pdftex.def Info: figures/M35_cmd_filtered.png  used on input line 211.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 211.
+               Default added (so using `tbp') on input line 216.
 
-<figures/M15_cmd_unfiltered.png, id=154, 462.528pt x 346.896pt>
+<figures/M15_cmd_unfiltered.png, id=155, 462.528pt x 346.896pt>
 File: figures/M15_cmd_unfiltered.png Graphic file (type png)
 <use figures/M15_cmd_unfiltered.png>
-Package pdftex.def Info: figures/M15_cmd_unfiltered.png  used on input line 213
+Package pdftex.def Info: figures/M15_cmd_unfiltered.png  used on input line 218
 .
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 218.
+               Default added (so using `tbp') on input line 223.
 
-<figures/M15_cmd_filtered.png, id=155, 462.528pt x 346.896pt>
+<figures/M15_cmd_filtered.png, id=156, 462.528pt x 346.896pt>
 File: figures/M15_cmd_filtered.png Graphic file (type png)
 <use figures/M15_cmd_filtered.png>
-Package pdftex.def Info: figures/M15_cmd_filtered.png  used on input line 220.
+Package pdftex.def Info: figures/M15_cmd_filtered.png  used on input line 225.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 [5 <./figures/M67_pm_unfiltered.png>] [6 <./figures/M67_cmd_unfiltered.png> <./
 figures/M35_cmd_unfiltered.png>] [7 <./figures/M35_cmd_bright_filtered.png> <./
@@ -833,49 +833,49 @@ figures/M35_cmd_parallax_filtered.png>] [8 <./figures/M35_cmd_filtered.png> <./
 figures/M15_cmd_unfiltered.png>]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 229.
+               Default added (so using `tbp') on input line 234.
 
 <figures/M67_cmd_filtered_labeled.png, id=189, 462.528pt x 346.896pt>
 File: figures/M67_cmd_filtered_labeled.png Graphic file (type png)
 <use figures/M67_cmd_filtered_labeled.png>
 Package pdftex.def Info: figures/M67_cmd_filtered_labeled.png  used on input li
-ne 231.
+ne 236.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 [9 <./figures/M15_cmd_filtered.png>]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 240.
+               Default added (so using `tbp') on input line 245.
 
-<figures/M67_MS_spread.png, id=199, 462.528pt x 346.896pt>
+<figures/M67_MS_spread.png, id=200, 462.528pt x 346.896pt>
 File: figures/M67_MS_spread.png Graphic file (type png)
 <use figures/M67_MS_spread.png>
-Package pdftex.def Info: figures/M67_MS_spread.png  used on input line 242.
+Package pdftex.def Info: figures/M67_MS_spread.png  used on input line 247.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 [10 <./figures/M67_cmd_filtered_labeled.png>]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 266.
+               Default added (so using `tbp') on input line 276.
 
-<figures/iso_age.pdf, id=209, 462.52798pt x 345.4506pt>
+<figures/iso_age.pdf, id=212, 462.52798pt x 345.4506pt>
 File: figures/iso_age.pdf Graphic file (type pdf)
 <use figures/iso_age.pdf>
-Package pdftex.def Info: figures/iso_age.pdf  used on input line 268.
+Package pdftex.def Info: figures/iso_age.pdf  used on input line 278.
 (pdftex.def)             Requested size: 252.94499pt x 188.91783pt.
-<figures/iso_metallicity.pdf, id=210, 462.52798pt x 345.4506pt>
+<figures/iso_metallicity.pdf, id=213, 462.52798pt x 345.4506pt>
 File: figures/iso_metallicity.pdf Graphic file (type pdf)
 <use figures/iso_metallicity.pdf>
-Package pdftex.def Info: figures/iso_metallicity.pdf  used on input line 269.
+Package pdftex.def Info: figures/iso_metallicity.pdf  used on input line 279.
 (pdftex.def)             Requested size: 252.94499pt x 188.91783pt.
 [11 <./figures/M67_MS_spread.png>]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 277.
+               Default added (so using `tbp') on input line 287.
 
-<figures/M67_condensed_CMD_overlay.png, id=221, 462.528pt x 346.896pt>
+<figures/M67_condensed_CMD_overlay.png, id=224, 462.528pt x 346.896pt>
 File: figures/M67_condensed_CMD_overlay.png Graphic file (type png)
 <use figures/M67_condensed_CMD_overlay.png>
 Package pdftex.def Info: figures/M67_condensed_CMD_overlay.png  used on input l
-ine 279.
+ine 289.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 [12 <./figures/iso_age.pdf> <./figures/iso_metallicity.pdf
 
@@ -884,36 +884,36 @@ ultiple pdfs with page group included in a single page
 >]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 296.
+               Default added (so using `tbp') on input line 306.
 
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 326.
+               Default added (so using `tbp') on input line 336.
 
-<figures/M35_CMD_Iso_BestFit.png, id=300, 462.528pt x 346.896pt>
+<figures/M35_CMD_Iso_BestFit.png, id=303, 462.528pt x 346.896pt>
 File: figures/M35_CMD_Iso_BestFit.png Graphic file (type png)
 <use figures/M35_CMD_Iso_BestFit.png>
-Package pdftex.def Info: figures/M35_CMD_Iso_BestFit.png  used on input line 32
+Package pdftex.def Info: figures/M35_CMD_Iso_BestFit.png  used on input line 33
 8.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 333.
+               Default added (so using `tbp') on input line 343.
 
-<figures/M67_CMD_Iso_BestFit.png, id=301, 462.528pt x 346.896pt>
+<figures/M67_CMD_Iso_BestFit.png, id=304, 462.528pt x 346.896pt>
 File: figures/M67_CMD_Iso_BestFit.png Graphic file (type png)
 <use figures/M67_CMD_Iso_BestFit.png>
-Package pdftex.def Info: figures/M67_CMD_Iso_BestFit.png  used on input line 33
+Package pdftex.def Info: figures/M67_CMD_Iso_BestFit.png  used on input line 34
 5.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 340.
+               Default added (so using `tbp') on input line 350.
 
-<figures/M15_CMD_Iso_BestFit.png, id=302, 462.528pt x 346.896pt>
+<figures/M15_CMD_Iso_BestFit.png, id=305, 462.528pt x 346.896pt>
 File: figures/M15_CMD_Iso_BestFit.png Graphic file (type png)
 <use figures/M15_CMD_Iso_BestFit.png>
-Package pdftex.def Info: figures/M15_CMD_Iso_BestFit.png  used on input line 34
+Package pdftex.def Info: figures/M15_CMD_Iso_BestFit.png  used on input line 35
 2.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 [13 <./figures/M67_condensed_CMD_overlay.png>] [14 <./figures/M35_CMD_Iso_BestF
@@ -921,99 +921,99 @@ it.png>] [15 <./figures/M67_CMD_Iso_BestFit.png> <./figures/M15_CMD_Iso_BestFit
 .png>]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 353.
+               Default added (so using `tbp') on input line 363.
 
-<figures/M67_radialBins.png, id=327, 578.16pt x 578.16pt>
+<figures/M67_radialBins.png, id=330, 578.16pt x 578.16pt>
 File: figures/M67_radialBins.png Graphic file (type png)
 <use figures/M67_radialBins.png>
-Package pdftex.def Info: figures/M67_radialBins.png  used on input line 355.
+Package pdftex.def Info: figures/M67_radialBins.png  used on input line 365.
 (pdftex.def)             Requested size: 343.28249pt x 343.28165pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 360.
+               Default added (so using `tbp') on input line 370.
 
-<figures/M67_radialBins_center.png, id=328, 578.16pt x 578.16pt>
+<figures/M67_radialBins_center.png, id=331, 578.16pt x 578.16pt>
 File: figures/M67_radialBins_center.png Graphic file (type png)
 <use figures/M67_radialBins_center.png>
 Package pdftex.def Info: figures/M67_radialBins_center.png  used on input line 
-362.
+372.
 (pdftex.def)             Requested size: 343.28249pt x 343.28165pt.
 [16 <./figures/M67_radialBins.png>]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 374.
+               Default added (so using `tbp') on input line 384.
 
-<figures/M67_numDensity_filtered.png, id=343, 462.528pt x 346.896pt>
+<figures/M67_numDensity_filtered.png, id=346, 462.528pt x 346.896pt>
 File: figures/M67_numDensity_filtered.png Graphic file (type png)
 <use figures/M67_numDensity_filtered.png>
 Package pdftex.def Info: figures/M67_numDensity_filtered.png  used on input lin
-e 376.
+e 386.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 383.
+               Default added (so using `tbp') on input line 393.
 
-<figures/M67_massDensity_filtered.png, id=349, 462.528pt x 346.896pt>
+<figures/M67_massDensity_filtered.png, id=352, 462.528pt x 346.896pt>
 File: figures/M67_massDensity_filtered.png Graphic file (type png)
 <use figures/M67_massDensity_filtered.png>
 Package pdftex.def Info: figures/M67_massDensity_filtered.png  used on input li
-ne 385.
+ne 395.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 [17 <./figures/M67_radialBins_center.png>] [18 <./figures/M67_numDensity_filter
 ed.png> <./figures/M67_massDensity_filtered.png>]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 425.
+               Default added (so using `tbp') on input line 435.
 
-<figures/M67_averageMass_filtered.png, id=374, 462.528pt x 346.896pt>
+<figures/M67_averageMass_filtered.png, id=377, 462.528pt x 346.896pt>
 File: figures/M67_averageMass_filtered.png Graphic file (type png)
 <use figures/M67_averageMass_filtered.png>
 Package pdftex.def Info: figures/M67_averageMass_filtered.png  used on input li
-ne 427.
+ne 437.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 432.
+               Default added (so using `tbp') on input line 442.
 
-<figures/M67_massFrequency_filtered.png, id=375, 462.528pt x 346.896pt>
+<figures/M67_massFrequency_filtered.png, id=378, 462.528pt x 346.896pt>
 File: figures/M67_massFrequency_filtered.png Graphic file (type png)
 <use figures/M67_massFrequency_filtered.png>
 Package pdftex.def Info: figures/M67_massFrequency_filtered.png  used on input 
-line 434.
+line 444.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 439.
+               Default added (so using `tbp') on input line 449.
 
-<figures/M67_magFrequency_filtered.png, id=376, 462.528pt x 346.896pt>
+<figures/M67_magFrequency_filtered.png, id=379, 462.528pt x 346.896pt>
 File: figures/M67_magFrequency_filtered.png Graphic file (type png)
 <use figures/M67_magFrequency_filtered.png>
 Package pdftex.def Info: figures/M67_magFrequency_filtered.png  used on input l
-ine 441.
+ine 451.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 446.
+               Default added (so using `tbp') on input line 456.
 
-<figures/M67_colorFrequency_filtered.png, id=377, 462.528pt x 346.896pt>
+<figures/M67_colorFrequency_filtered.png, id=380, 462.528pt x 346.896pt>
 File: figures/M67_colorFrequency_filtered.png Graphic file (type png)
 <use figures/M67_colorFrequency_filtered.png>
 Package pdftex.def Info: figures/M67_colorFrequency_filtered.png  used on input
- line 448.
+ line 458.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 457.
+               Default added (so using `tbp') on input line 467.
 
-<figures/gaia_table1.png, id=380, 465.23813pt x 761.84625pt>
+<figures/gaia_table1.png, id=383, 465.23813pt x 761.84625pt>
 File: figures/gaia_table1.png Graphic file (type png)
 <use figures/gaia_table1.png>
-Package pdftex.def Info: figures/gaia_table1.png  used on input line 459.
+Package pdftex.def Info: figures/gaia_table1.png  used on input line 469.
 (pdftex.def)             Requested size: 252.94499pt x 414.20406pt.
-<figures/gaia_table2.png, id=381, 460.72125pt x 542.77782pt>
+<figures/gaia_table2.png, id=384, 460.72125pt x 542.77782pt>
 File: figures/gaia_table2.png Graphic file (type png)
 <use figures/gaia_table2.png>
-Package pdftex.def Info: figures/gaia_table2.png  used on input line 460.
+Package pdftex.def Info: figures/gaia_table2.png  used on input line 470.
 (pdftex.def)             Requested size: 252.94499pt x 297.99039pt.
 [19] [20 <./figures/M67_averageMass_filtered.png> <./figures/M67_massFrequency_
 filtered.png>] [21 <./figures/M67_magFrequency_filtered.png> <./figures/M67_col
@@ -1021,141 +1021,131 @@ orFrequency_filtered.png>] [22 <./figures/gaia_table1.png> <./figures/gaia_tabl
 e2.png>]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 476.
+               Default added (so using `tbp') on input line 486.
 
-<figures/pop_cmd_apparent.png, id=419, 578.16pt x 433.62pt>
+<figures/pop_cmd_apparent.png, id=421, 578.16pt x 433.62pt>
 File: figures/pop_cmd_apparent.png Graphic file (type png)
 <use figures/pop_cmd_apparent.png>
-Package pdftex.def Info: figures/pop_cmd_apparent.png  used on input line 478.
+Package pdftex.def Info: figures/pop_cmd_apparent.png  used on input line 488.
 (pdftex.def)             Requested size: 343.28249pt x 257.46124pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 483.
+               Default added (so using `tbp') on input line 493.
 
-<figures/pop_cmd_absolute.png, id=420, 578.16pt x 433.62pt>
+<figures/pop_cmd_absolute.png, id=422, 578.16pt x 433.62pt>
 File: figures/pop_cmd_absolute.png Graphic file (type png)
 <use figures/pop_cmd_absolute.png>
-Package pdftex.def Info: figures/pop_cmd_absolute.png  used on input line 485.
+Package pdftex.def Info: figures/pop_cmd_absolute.png  used on input line 495.
 (pdftex.def)             Requested size: 343.28249pt x 257.46124pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 490.
+               Default added (so using `tbp') on input line 500.
 
-<figures/pop_cmd_shifted.png, id=425, 578.16pt x 433.62pt>
+<figures/pop_cmd_shifted.png, id=427, 578.16pt x 433.62pt>
 File: figures/pop_cmd_shifted.png Graphic file (type png)
 <use figures/pop_cmd_shifted.png>
-Package pdftex.def Info: figures/pop_cmd_shifted.png  used on input line 492.
+Package pdftex.def Info: figures/pop_cmd_shifted.png  used on input line 502.
 (pdftex.def)             Requested size: 343.28249pt x 257.46124pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 499.
+               Default added (so using `tbp') on input line 509.
 
-<figures/M67_numDensity_bounded.png, id=430, 462.528pt x 346.896pt>
+<figures/M67_numDensity_bounded.png, id=432, 462.528pt x 346.896pt>
 File: figures/M67_numDensity_bounded.png Graphic file (type png)
 <use figures/M67_numDensity_bounded.png>
 Package pdftex.def Info: figures/M67_numDensity_bounded.png  used on input line
- 501.
+ 511.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 506.
+               Default added (so using `tbp') on input line 516.
 
-<figures/M67_averageMass_bounded.png, id=431, 462.528pt x 346.896pt>
+<figures/M67_averageMass_bounded.png, id=433, 462.528pt x 346.896pt>
 File: figures/M67_averageMass_bounded.png Graphic file (type png)
 <use figures/M67_averageMass_bounded.png>
 Package pdftex.def Info: figures/M67_averageMass_bounded.png  used on input lin
-e 508.
+e 518.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 [23 <./figures/pop_cmd_apparent.png>] [24 <./figures/pop_cmd_absolute.png> <./f
 igures/pop_cmd_shifted.png>] [25 <./figures/M67_numDensity_bounded.png> <./figu
 res/M67_averageMass_bounded.png>]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 520.
+               Default added (so using `tbp') on input line 530.
 
-<figures/NGC2360_CMD_Iso_BestFit.png, id=460, 462.528pt x 346.896pt>
+<figures/NGC2360_CMD_Iso_BestFit.png, id=463, 462.528pt x 346.896pt>
 File: figures/NGC2360_CMD_Iso_BestFit.png Graphic file (type png)
 <use figures/NGC2360_CMD_Iso_BestFit.png>
 Package pdftex.def Info: figures/NGC2360_CMD_Iso_BestFit.png  used on input lin
-e 522.
+e 532.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 532.
+               Default added (so using `tbp') on input line 542.
 
-<figures/mass_vs_age_filtered.png, id=462, 462.528pt x 346.896pt>
+<figures/mass_vs_age_filtered.png, id=465, 462.528pt x 346.896pt>
 File: figures/mass_vs_age_filtered.png Graphic file (type png)
 <use figures/mass_vs_age_filtered.png>
 Package pdftex.def Info: figures/mass_vs_age_filtered.png  used on input line 5
-34.
+44.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 [26 <./figures/NGC2360_CMD_Iso_BestFit.png>]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 545.
+               Default added (so using `tbp') on input line 555.
 
-<figures/mass_vs_age_bounded.png, id=481, 462.528pt x 346.896pt>
+<figures/mass_vs_age_bounded.png, id=483, 462.528pt x 346.896pt>
 File: figures/mass_vs_age_bounded.png Graphic file (type png)
 <use figures/mass_vs_age_bounded.png>
-Package pdftex.def Info: figures/mass_vs_age_bounded.png  used on input line 54
+Package pdftex.def Info: figures/mass_vs_age_bounded.png  used on input line 55
 7.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 552.
+               Default added (so using `tbp') on input line 567.
 
-<figures/mass_vs_age_bounded_fit.png, id=484, 462.528pt x 346.896pt>
-File: figures/mass_vs_age_bounded_fit.png Graphic file (type png)
-<use figures/mass_vs_age_bounded_fit.png>
-Package pdftex.def Info: figures/mass_vs_age_bounded_fit.png  used on input lin
-e 554.
-(pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
-
-LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 563.
-
-<figures/bounded_fraction_vs_dist.png, id=489, 462.528pt x 346.896pt>
+<figures/bounded_fraction_vs_dist.png, id=488, 462.528pt x 346.896pt>
 File: figures/bounded_fraction_vs_dist.png Graphic file (type png)
 <use figures/bounded_fraction_vs_dist.png>
 Package pdftex.def Info: figures/bounded_fraction_vs_dist.png  used on input li
-ne 565.
+ne 569.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 570.
+               Default added (so using `tbp') on input line 574.
 
-<figures/mass_intercept_vs_age_bounded.png, id=490, 462.528pt x 346.896pt>
+<figures/mass_intercept_vs_age_bounded.png, id=489, 462.528pt x 346.896pt>
 File: figures/mass_intercept_vs_age_bounded.png Graphic file (type png)
 <use figures/mass_intercept_vs_age_bounded.png>
 Package pdftex.def Info: figures/mass_intercept_vs_age_bounded.png  used on inp
-ut line 572.
+ut line 576.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 577.
+               Default added (so using `tbp') on input line 581.
 
-<figures/mag_vs_dist_bounded.png, id=495, 462.528pt x 346.896pt>
+<figures/mag_vs_dist_bounded.png, id=494, 462.528pt x 346.896pt>
 File: figures/mag_vs_dist_bounded.png Graphic file (type png)
 <use figures/mag_vs_dist_bounded.png>
-Package pdftex.def Info: figures/mag_vs_dist_bounded.png  used on input line 57
-9.
+Package pdftex.def Info: figures/mag_vs_dist_bounded.png  used on input line 58
+3.
 (pdftex.def)             Requested size: 343.28249pt x 257.47182pt.
 [27 <./figures/mass_vs_age_filtered.png>] [28 <./figures/mass_vs_age_bounded.pn
-g> <./figures/mass_vs_age_bounded_fit.png>] [29 <./figures/bounded_fraction_vs_
-dist.png> <./figures/mass_intercept_vs_age_bounded.png>] [30 <./figures/mag_vs_
-dist_bounded.png>] (Wainwright_Thesis.bbl) [31] [32]
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 617.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 617.
+g> <./figures/bounded_fraction_vs_dist.png>] [29 <./figures/mass_intercept_vs_a
+ge_bounded.png> <./figures/mag_vs_dist_bounded.png>] [30]
+(Wainwright_Thesis.bbl) [31] [32]
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 624.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 624.
  (Wainwright_Thesis.aux)
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 617.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 624.
 Package rerunfilecheck Info: File `Wainwright_Thesis.out' has not changed.
 (rerunfilecheck)             Checksum: C9B421A5FE8D707D7345D55B3045D1EB;929.
  ) 
 Here is how much of TeX's memory you used:
- 10957 strings out of 492970
- 154663 string characters out of 3135842
- 345941 words of memory out of 3000000
- 14504 multiletter control sequences out of 15000+200000
+ 10955 strings out of 492970
+ 154493 string characters out of 3135842
+ 344098 words of memory out of 3000000
+ 14502 multiletter control sequences out of 15000+200000
  15230 words of font info for 59 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  36i,14n,53p,7593b,439s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -1174,9 +1164,9 @@ gram Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr9.pfb><C:/Program Files
 /type1/public/amsfonts/cm/cmsy7.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/pu
 blic/amsfonts/cm/cmsy9.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsf
 onts/cm/cmti10.pfb>
-Output written on Wainwright_Thesis.pdf (32 pages, 11573464 bytes).
+Output written on Wainwright_Thesis.pdf (32 pages, 11408382 bytes).
 PDF statistics:
- 642 PDF objects out of 1000 (max. 8388607)
- 110 named destinations out of 1000 (max. 500000)
- 319 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 641 PDF objects out of 1000 (max. 8388607)
+ 111 named destinations out of 1000 (max. 500000)
+ 314 words of extra memory for PDF output out of 10000 (max. 10000000)
 

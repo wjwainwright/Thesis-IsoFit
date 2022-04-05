@@ -8,11 +8,11 @@
 \contentsline {subsection}{\numberline {2.1}Filtering the Data}{3}{subsection.2.1}
 \contentsline {section}{\numberline {3}Heart of the Data}{5}{section.3}
 \contentsline {subsection}{\numberline {3.1}Isochrones}{10}{subsection.3.1}
-\contentsline {subsection}{\numberline {3.2}Fitting}{11}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.2}Fitting}{12}{subsection.3.2}
 \contentsline {section}{\numberline {4}Membership Profiles}{13}{section.4}
 \contentsline {section}{\numberline {5}Uncertainties and Potential Biases}{19}{section.5}
 \contentsline {subsection}{\numberline {5.1}Brightness Bias}{19}{subsection.5.1}
 \contentsline {subsection}{\numberline {5.2}Introduced Uncertainties}{23}{subsection.5.2}
 \contentsline {section}{\numberline {6}Population Statistics}{26}{section.6}
 \contentsline {section}{\numberline {7}Future Work}{27}{section.7}
-\contentsline {section}{\numberline {8}Acknowledgments}{31}{section.8}
+\contentsline {section}{\numberline {8}Acknowledgments}{30}{section.8}
