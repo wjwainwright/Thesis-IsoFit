@@ -329,6 +329,104 @@ class cataloguedCluster():
         self.noise_cutoff = float(noise_cutoff)
 
 
+
+
+
+
+class Datum:
+    from matplotlib import colors as mcolors
+    colorin = mcolors.to_rgba("red")
+    colorout = mcolors.to_rgba("blue")
+
+    def __init__(self, x, y, include=False):
+        self.x = x
+        self.y = y
+        if include:
+            self.color = self.colorin
+        else:
+            self.color = self.colorout
+
+
+class LassoManager:
+    
+
+    def __init__(self, ax, data, cluster):
+        from matplotlib.collections import RegularPolyCollection
+        
+        self.axes = ax
+        self.canvas = ax.figure.canvas
+        self.data = data
+        self.cluster = cluster
+
+        self.Nxy = len(data)
+
+        facecolors = [d.color for d in data]
+        self.xys = [(d.x, d.y) for d in data]
+        self.collection = RegularPolyCollection(
+            6, sizes=(5,),
+            facecolors=facecolors,
+            offsets=self.xys,
+            transOffset=ax.transData)
+
+        ax.add_collection(self.collection)
+
+        self.cid = self.canvas.mpl_connect('button_press_event', self.on_press)
+
+    def callback(self, verts):
+        from matplotlib import path
+        global coords
+        global clusters
+        
+        cluster = clusters[self.cluster.name]
+        
+        facecolors = self.collection.get_facecolors()
+        p = path.Path(verts)
+        ind = p.contains_points(self.xys)
+        
+        cluster.binaries = []
+        
+        for i in range(len(self.xys)):
+            if ind[i]:
+                facecolors[i] = Datum.colorin
+                star = cluster.filtered[[a.b_r for a in cluster.filtered].index(self.xys[i][0])]
+                cluster.binaries.append(star)
+            else:
+                facecolors[i] = Datum.colorout
+        self.canvas.draw_idle()
+        self.canvas.widgetlock.release(self.lasso)
+        del self.lasso
+
+    def on_press(self, event):
+        from matplotlib.widgets import Lasso
+        
+        if self.canvas.widgetlock.locked():
+            return
+        if event.inaxes is None:
+            return
+        self.lasso = Lasso(event.inaxes,
+                           (event.xdata, event.ydata),
+                           self.callback)
+        # acquire a lock on the widget drawing
+        self.canvas.widgetlock(self.lasso)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def clusterCatalogue(types='all'):
     import numpy as np
     import pandas as pd
@@ -723,6 +821,11 @@ def calcStats(cluster,mode='filtered'):
     
     loopList=[]
     
+    checkLoaded([cluster])
+    
+    if type(cluster) == str:
+        cluster = clusters[cluster]
+    
     if mode == 'bright':
         loopList = cluster.filteredBright
     elif mode == 'narrow':
@@ -768,6 +871,7 @@ def calcStats(cluster,mode='filtered'):
     
     for star in loopList:
         star.radDist = np.sqrt((star.ra-cluster.mean_ra)**2+(star.dec-cluster.mean_dec)**2)
+        star.normRadDist =  np.sqrt((star.ra*np.cos(star.dec*np.pi/180)-cluster.mean_ra*np.cos(cluster.mean_dec*np.pi/180))**2+(star.dec-cluster.mean_dec)**2)
 
 
 def saveClusters(cList):
@@ -860,7 +964,7 @@ def dataProcess(cList,load=False,fit=True,unload=True,plotting=True,member=True,
         loadIsochrones()
     
     
-    loadList = ["M15","M39","M46","M67","NGC188","NGC2355","NGC2158","IC4651","NGC6791","NGC2360","NGC2204"]
+    loadList = ["M15","M12","M39","M46","M67","NGC188","NGC2355","NGC2158","IC4651","NGC6791","NGC2360","NGC2204"]
     
     for cl in cList:
         
@@ -1171,7 +1275,7 @@ def onclick(x,y,fig,ax,cluster,minScore,weighting,newList):
                 if abs(ix-cx) <= 0.075 and abs(iy-cy) <= 0.25:
                     coords.pop(i)
             ax.clear()
-            ax.scatter(x,y,s=0.5,color='darkgray')
+            ax.scatter(x,y,s=0.5,color='dimgray')
             ax.invert_yaxis()
             ax.scatter([a[0] for a in coords],[a[1] for a in coords],c='red',s=10)
             plt.gcf().canvas.draw_idle()
@@ -1313,7 +1417,7 @@ def condense(cList,condensing,weighting,tp,minScore=0.001):
             x,y = mag[:,0],mag[:,1]
             fig = plt.figure()
             ax = fig.add_subplot(111)
-            ax.scatter(x,y,s=0.25,color='darkgray')
+            ax.scatter(x,y,s=0.25,color='dimgray')
             ax.invert_yaxis()
             
             hook = onclick(x,y,fig,ax,cluster,minScore,weighting,newList)
@@ -1599,7 +1703,7 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             plt.xlabel('RA (Deg)')
             plt.ylabel('DEC (Deg)')
             plt.title(f"{cluster.name} Unfiltered")
-            plt.scatter(unfra[:],unfdec[:],s=0.5,c='darkgray')
+            plt.scatter(unfra[:],unfdec[:],s=0.5,c='dimgray')
             plt.axis("square")
             plt.savefig(f"{cluster.imgPath}{cluster.name}_ra_dec_unfiltered.pdf")
             plt.savefig(f"{cluster.imgPath}png/{cluster.name}_ra_dec_unfiltered.png",dpi=500)
@@ -1619,7 +1723,7 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             plt.xlabel('RA (Deg)')
             plt.ylabel('DEC (Deg)')
             plt.title(f"{cluster.name} Overlay")
-            plt.scatter(unfra[:],unfdec[:],s=0.5,c='darkgray')
+            plt.scatter(unfra[:],unfdec[:],s=0.5,c='lightgray')
             plt.scatter(ra[:],dec[:],s=1,c='midnightblue')
             plt.axis("square")
             plt.savefig(f"{cluster.imgPath}{cluster.name}_ra_dec_overlay.pdf")
@@ -1634,7 +1738,7 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             plt.xlabel('RA*cos(DEC) (Deg)')
             plt.ylabel('DEC (Deg)')
             plt.title(f"{cluster.name} Unfiltered Normalized")
-            plt.scatter(unfnormra[:],unfdec[:],s=0.5,c='darkgray')
+            plt.scatter(unfnormra[:],unfdec[:],s=0.5,c='dimgray')
             #plt.axis("square")
             plt.savefig(f"{cluster.imgPath}{cluster.name}_ra_dec_unfiltered_normalized.pdf")
             plt.savefig(f"{cluster.imgPath}png/{cluster.name}_ra_dec_unfiltered_normalized.png",dpi=500)
@@ -1654,7 +1758,7 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             plt.xlabel('RA*cos(DEC) (Deg)')
             plt.ylabel('DEC (Deg)')
             plt.title(f"{cluster.name} Overlay Normalized")
-            plt.scatter(unfnormra[:],unfdec[:],s=0.5,c='darkgray')
+            plt.scatter(unfnormra[:],unfdec[:],s=0.5,c='lightgray')
             plt.scatter(normra[:],dec[:],s=1,c='midnightblue')
             #plt.axis("square")
             plt.savefig(f"{cluster.imgPath}{cluster.name}_ra_dec_overlay_normalized.pdf")
@@ -1690,10 +1794,10 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             
             #Unfiltered proper motion plot
             plt.figure(f"{cluster.name}_pm_unfiltered")
-            plt.xlabel(r'PMRA (mas*yr^{-1})')
-            plt.ylabel(r'PMDEC (mas*yr^{-1})')
+            plt.xlabel(r'PMRA ($mas*yr^{-1}$)')
+            plt.ylabel(r'PMDEC ($mas*yr^{-1}$)')
             plt.title(f"{cluster.name} Unfiltered")
-            plt.scatter(unfpmra[:],unfpmdec[:],s=0.5,c='darkgray')
+            plt.scatter(unfpmra[:],unfpmdec[:],s=0.5,c='dimgray')
             plt.xlim([xmin,xmax])
             plt.ylim([ymin,ymax])
             # plt.axis("square")
@@ -1707,8 +1811,8 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             
             #Filtered proper motion plot
             plt.figure(f"{cluster.name}_pm_filtered")
-            plt.xlabel(r'PMRA (mas*yr^{-1})')
-            plt.ylabel(r'PMDEC (mas*yr^{-1})')
+            plt.xlabel(r'PMRA ($mas*yr^{-1}$)')
+            plt.ylabel(r'PMDEC ($mas*yr^{-1}$)')
             plt.title(f"{cluster.name} Filtered")
             plt.scatter(pmra[:],pmdec[:],s=0.5,c='midnightblue')
             # plt.xlim([xmin,xmax])
@@ -1719,10 +1823,10 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             
             #Proper motion overlay
             plt.figure(f"{cluster.name}_pm_overlay")
-            plt.xlabel(r'PMRA (mas*yr^{-1})')
-            plt.ylabel(r'PMDEC (mas*yr^{-1})')
+            plt.xlabel(r'PMRA ($mas*yr^{-1}$)')
+            plt.ylabel(r'PMDEC ($mas*yr^{-1}$)')
             plt.title(f"{cluster.name} Overlay")
-            plt.scatter(unfpmra[:],unfpmdec[:],s=0.5,c='darkgray')
+            plt.scatter(unfpmra[:],unfpmdec[:],s=0.5,c='lightgray')
             plt.scatter(pmra[:],pmdec[:],s=1,c='midnightblue')
             plt.xlim([xmin,xmax])
             plt.ylim([ymin,ymax])
@@ -1740,7 +1844,7 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             plt.xlabel('PMRA / Parallax')
             plt.ylabel('PMDEC / Parallax')
             plt.title(f"{cluster.name} Unfiltered")
-            plt.scatter([a/b for a,b in zip(unfpmra,unfpara)],[a/b for a,b in zip(unfpmdec,unfpara)],s=0.5,c='darkgray')
+            plt.scatter([a/b for a,b in zip(unfpmra,unfpara)],[a/b for a,b in zip(unfpmdec,unfpara)],s=0.5,c='dimgray')
             plt.xlim([xmin,xmax])
             plt.ylim([ymin,ymax])
             # plt.axis("square")
@@ -1752,7 +1856,7 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             plt.xlabel('PMRA * Parallax')
             plt.ylabel('PMDEC * Parallax')
             plt.title(f"{cluster.name} Unfiltered")
-            plt.scatter([a*b for a,b in zip(unfpmra,unfpara)],[a*b for a,b in zip(unfpmdec,unfpara)],s=0.5,c='darkgray')
+            plt.scatter([a*b for a,b in zip(unfpmra,unfpara)],[a*b for a,b in zip(unfpmdec,unfpara)],s=0.5,c='dimgray')
             plt.xlim([xmin,xmax])
             plt.ylim([ymin,ymax])
             # plt.axis("square")
@@ -1779,7 +1883,7 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             plt.xlabel('BP-RP')
             plt.ylabel('G Mag')
             plt.title(f"{cluster.name} Reddening = {cluster.reddening:.2f}")
-            plt.scatter(b_r[:],gmag[:],s=0.5,c='darkgray',label='Observed')
+            plt.scatter(b_r[:],gmag[:],s=0.5,c='dimgray',label='Observed')
             plt.arrow(b_r[int(len(b_r)/2)]-cluster.reddening,gmag[int(len(gmag)/2)]-2.1*cluster.reddening,cluster.reddening,2.1*cluster.reddening,color='red')
             plt.scatter([s-cluster.reddening for s in b_r[:]],[s-2.1*cluster.reddening for s in gmag[:]],s=1,c='midnightblue',label='Corrected')
             plt.legend()
@@ -1792,7 +1896,7 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             plt.xlabel('BP-RP')
             plt.ylabel('Apparent G Mag')
             plt.title(f"{cluster.name} Unfiltered")
-            plt.scatter(unf_b_r[:],unfgmag[:],s=0.5,c='darkgray')
+            plt.scatter(unf_b_r[:],unfgmag[:],s=0.5,c='dimgray')
             plt.savefig(f"{cluster.imgPath}{cluster.name}_CMD_unfiltered.pdf")
             plt.savefig(f"{cluster.imgPath}png/{cluster.name}_CMD_unfiltered.png",dpi=500)
             
@@ -1812,7 +1916,7 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             plt.xlabel('BP-RP')
             plt.ylabel('Apparent G Mag')
             plt.title(f"{cluster.name} Overlay")
-            plt.scatter(unf_b_r[:],unfgmag[:],s=0.5,c='darkgray')
+            plt.scatter(unf_b_r[:],unfgmag[:],s=0.5,c='dimgray')
             plt.scatter(b_r[:],gmag[:],s=1,c='midnightblue')
             plt.savefig(f"{cluster.imgPath}{cluster.name}_CMD_overlay.pdf")
             plt.savefig(f"{cluster.imgPath}png/{cluster.name}_CMD_overlay.png",dpi=500)
@@ -1823,8 +1927,8 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             plt.xlabel('BP-RP')
             plt.ylabel('Apparent G Mag')
             plt.title(f"{cluster.name} Condensed Overlay")
-            plt.scatter([s - cluster.reddening for s in b_r],[s - 2.1*cluster.reddening for s in gmag],s=0.5,c='darkgray',label='Data')
-            plt.scatter([s.b_r - cluster.reddening for s in cluster.condensed],[s.g_mag - 2.1*cluster.reddening for s in cluster.condensed],s=5,c='midnightblue',label='Proxy Points')
+            plt.scatter([s - cluster.reddening for s in b_r],[s - 2.1*cluster.reddening for s in gmag],s=0.5,c='dimgray',label='Data')
+            plt.scatter([s.b_r - cluster.reddening for s in cluster.condensed],[s.g_mag - 2.1*cluster.reddening for s in cluster.condensed],s=5,c='red',label='Proxy Points')
             try:
                 plt.axvline(x=cluster.turnPoint[0] - cluster.reddening,linestyle='--',color='midnightblue',linewidth=0.8,label='95% of Turning Point')
             except:
@@ -1839,7 +1943,7 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             plt.xlabel('BP-RP')
             plt.ylabel('Apparent G Mag')
             plt.title(f"{cluster.name} Weighted Overlay")
-            plt.scatter([s - cluster.reddening for s in b_r],[s - 2.1*cluster.reddening for s in gmag],s=0.5,c='darkgray',label='Data')
+            plt.scatter([s - cluster.reddening for s in b_r],[s - 2.1*cluster.reddening for s in gmag],s=0.5,c='dimgray',label='Data')
             plt.scatter([s.b_r - cluster.reddening for s in cluster.condensed],[s.g_mag - 2.1*cluster.reddening for s in cluster.condensed],s=5,c=[s.weight for s in cluster.condensed],label='Proxy Points')
             try:
                 plt.axvline(x=cluster.turnPoint[0] - cluster.reddening,linestyle='--',color='midnightblue',linewidth=0.8,label='95% of Turning Point')
@@ -1859,8 +1963,8 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             plt.xlabel('BP-RP')
             plt.ylabel('Apparent G Mag')
             plt.title(f"{cluster.name} Initial Condensed Overlay")
-            plt.scatter(b_r,gmag,s=0.5,c='darkgray',label='Data')
-            plt.scatter([s.b_r for s in cluster.condensedInit],[s.g_mag for s in cluster.condensedInit],s=5,c='midnightblue',label='Proxy Points')
+            plt.scatter(b_r,gmag,s=0.5,c='dimgray',label='Data')
+            plt.scatter([s.b_r for s in cluster.condensedInit],[s.g_mag for s in cluster.condensedInit],s=5,c='red',label='Proxy Points')
             try:
                 plt.axvline(x=cluster.turnPoint[0] - cluster.reddening,linestyle='--',color='midnightblue',linewidth=0.8,label='95% of Turning Point')
             except:
@@ -1938,7 +2042,7 @@ def plot(cList=['all'],modes=['pos','pm','cmd','quiver','iso'],closePlots=False)
             plt.xlabel('Dereddened BP-RP')
             plt.ylabel('Corrected Absolute G Mag')
             plt.title(f"{cluster.name} Isochrone Best Fit")
-            plt.scatter([s - cluster.reddening for s in b_r],[s - 2.1*cluster.reddening-cluster.dist_mod for s in gmag],s=0.5,c='darkgray',label='Cluster')
+            plt.scatter([s - cluster.reddening for s in b_r],[s - 2.1*cluster.reddening-cluster.dist_mod for s in gmag],s=0.5,c='dimgray',label='Cluster')
             
             isoLabels = isochrone.name.split('_')
             isoLabel = r"$[\frac{Fe}{H}]$" + "=" + isoLabels[1] + "\n" \
@@ -2129,7 +2233,7 @@ def exportVOSA(cl):
     np.savetxt(f"{cluster.dataPath}{cluster.name}_VOSA.txt",data,fmt="%s")
 
 
-def readSED(cList=['all']):
+def readSED(cList=['all'],printMissing=False):
     #imports
     import numpy as np
     import re
@@ -2145,15 +2249,24 @@ def readSED(cList=['all']):
         
         names = []
         for star in cluster.filtered:
-            flat = star.name.replace(" ","")
+            flat = star.name.replace(" ","").replace("DR2","").replace("EDR3","").replace("DR3","")
             names.append(flat)
             star.flatName = flat
         cluster.stars = dict(zip(names,cluster.filtered))
         
         idx = 0
+        newStars = dict()
         
         #Each star in a cluster has its own folder, and each folder contains several data sets
         for folder in os.listdir(objPath):
+            
+            fileName = folder.replace("DR2","").replace("EDR3","").replace("DR3","")
+            #Weed out VOSA stars not in current filtered members list
+            if not fileName in cluster.stars:
+                if printMissing:
+                    print(f"{fileName} is missing from filtered list, skipping it...")
+                continue
+            
             main = open(objPath+folder+"/sed/"+folder+".sed.dat").read()
             main = main.split("\n")
             data = main[10:-1]
@@ -2166,9 +2279,59 @@ def readSED(cList=['all']):
                 sect = re.split('\s+',row)[1:-1]
                 measurements.append(vosaPoint(str(sect[0]),float(sect[1]),float(sect[2]),float(sect[3]),float(sect[4]),float(sect[5]),float(sect[6])))
             
-            cluster.stars[folder].vosaPoints = measurements
-            idx += 1
+            cluster.stars[fileName].vosaPoints = measurements
+            #Weed out cluster.stars members who do not have a vosa table
+            newStars[fileName] = cluster.stars[fileName]
             
+            idx += 1
+        
+        cluster.stars = newStars
+            
+ 
+            
+def checkBinary(cl):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    
+    checkLoaded([cl])
+    cluster = clusters[cl]
+    
+    global lman
+    
+    
+    data = [Datum(star.b_r,star.g_mag) for star in cluster.filtered]
+    
+    # ax = plt.axes(xlim=(cluster.min_b_r-0.25,cluster.max_b_r+0.25), ylim=(cluster.min_g_mag-1,cluster.max_g_mag+1),autoscale_on=False)
+    ax = plt.axes(xlim=(0, 2.5), ylim=(8, 20), autoscale_on=False)
+    
+    ax.invert_yaxis()
+    ax.set_title('Lasso points using left mouse button')
+
+    lman = LassoManager(ax, data,cluster)
+
+    plt.show()
+    
+    
+
+def vosaBinaries(cl):
+    #Imports
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import os
+    
+    checkLoaded([cl])
+    
+    cluster = clusters[cl]
+    
+    if not os.path.isdir(f"{cluster.imgPath}vosaBinaries/"):
+        os.mkdir(f"{cluster.imgPath}vosaBinaries/")
+    
+    
+    for star in cluster.stars.values():
+        if not star.binary == 1:
+            return
+        
+
 
 def excessIR(cl,plot=True):
     #Imports
@@ -2184,7 +2347,7 @@ def excessIR(cl,plot=True):
         os.mkdir(f"{cluster.imgPath}excessIR/")
     
     
-    for star in cluster.filtered:
+    for star in cluster.stars.values():
         
         excess = False
         
@@ -2197,7 +2360,7 @@ def excessIR(cl,plot=True):
             
             #print(f"{star.name} has {len(star.vosaPoints)} VOSA points")
             
-            star.excess = 1
+            star.hasExcess = 1
             
             if plot:
                 plt.figure(f'{cluster.name} - {star.name}')
@@ -2353,7 +2516,7 @@ def varHist2D(cl,var1,var2,color='default',listType='filtered'):
 
 
 
-def Plot3D(cList=['all'],showEarth=True):
+def Plot3D(cList=['all'],showEarth=True,flatten=True):
     #Imports
     import plotly.express as px
     import plotly.io as pio
@@ -2365,9 +2528,9 @@ def Plot3D(cList=['all'],showEarth=True):
     fig = px.scatter_3d()
     
     if showEarth:
-        fig.add_scatter3d(x=[0],y=[0],z=[0],marker=dict(color='black'),name="Earth")
+        fig.add_scatter3d(x=[0],y=[0],z=[0],marker=dict(color='lightblue'),name="Earth")
     
-    cList = checkLoaded([cList])
+    cList = checkLoaded(cList)
     
     big = []
     
@@ -2379,7 +2542,8 @@ def Plot3D(cList=['all'],showEarth=True):
         C = [1/(0.001*c.par) for c in cluster.filtered]
         
         #Flatten radially
-        C = [np.mean(C)]*len(C)
+        if flatten:
+            C = [np.mean(C)]*len(C)
         
         x = [c*np.cos(b)*np.cos(a) for a,b,c in zip(A,B,C)]
         y = [c*np.cos(b)*np.sin(a) for a,b,c in zip(A,B,C)]
@@ -2437,7 +2601,7 @@ def specificPlot(cl,iso,reddening,score):
     plt.xlabel('B-R')
     plt.ylabel('G Mag')
     plt.title(f"{cl} {iso}")
-    plt.scatter([s.b_r for s in cluster.filtered],[s.g_mag for s in cluster.filtered],s=0.05,c='darkgray',label='Cluster')
+    plt.scatter([s.b_r for s in cluster.filtered],[s.g_mag for s in cluster.filtered],s=0.05,c='dimgray',label='Cluster')
     plt.plot([x + reddening for x in isochrone.br],[x+cluster.dist_mod+2.1*reddening for x in isochrone.g],c='midnightblue',label=f"Score: {float(score):.7f}")
     plt.scatter([s.b_r for s in cluster.condensed],[s.g_mag for s in cluster.condensed],s=5,c=[s.weight for s in cluster.condensed],label='Cluster Proxy')
     
@@ -2551,7 +2715,7 @@ def onkey(x,y,cx,cy,fig,ax,cluster,iso,reddening):
         
         #Replots everything with the updated isochrone
         ax.clear()
-        ax.scatter(x,y,s=0.25,color='darkgray')
+        ax.scatter(x,y,s=0.25,color='dimgray')
         ax.scatter(cx,cy,s=4,color='red')
         ax.plot([a.Gaia_BP_EDR3-a.Gaia_RP_EDR3+curReddening for a in curIso.starList],[a.Gaia_G_EDR3+cluster.dist_mod+2.1*curReddening for a in curIso.starList],color='darkblue')
         ax.set_title(f"{curIso.name}\n {curReddening}\n {score}")
@@ -2667,7 +2831,7 @@ def interactivePlot(cl,iso=0,reddening="auto"):
     #Initialize the plot that will be updated every time
     fig = plt.figure(f"Interactive plot of {cl}")
     ax = fig.add_subplot(111)
-    ax.scatter(x,y,s=0.25,color='darkgray')
+    ax.scatter(x,y,s=0.25,color='dimgray')
     ax.scatter(cx,cy,s=4,color='red')
     ax.plot([a.Gaia_BP_EDR3-a.Gaia_RP_EDR3+reddening for a in isochrone.starList],[a.Gaia_G_EDR3+cluster.dist_mod+2.1*reddening for a in isochrone.starList],color='darkblue')
     ax.set_title(f"{name}\n {reddening}\n {score}")
@@ -2930,7 +3094,7 @@ def toIntensity(mag):
     return Isun*10**( 0.4*(msun-mag) )
 
 
-def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile=0.2,delta=5):
+def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile=0.2,delta=5,normalize=True):
     #Imports
     import numpy as np
     import matplotlib.pyplot as plt
@@ -2947,9 +3111,9 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     mode = mode.lower()
     
     #Default mode is filtered, but unfiltered data can be processed
-    if mode == "filtered":
+    if "filtered" in mode:
         starList = cluster.filtered
-    elif mode == "bounded":
+    elif "bounded" in mode:
         starList = cluster.bounded
     else:
         starList = cluster.unfilteredWide
@@ -2960,11 +3124,20 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     assert cluster.massLoaded
     assert len(starList) > 0
     
+    #Assign x and y lists based on normalization or not
+    if normalize:
+        starX = [a.ra*np.cos(a.dec*np.pi/180) for a in starList]
+        starY = [a.dec for a in starList]
+        mode = mode + "_normalized"
+    else:
+        starX = [a.ra for a in starList]
+        starY = [a.dec for a in starList]
+    
     #Determine bounds of the field of view (post-filtering)
-    xmax = sorted(starList,key=lambda x : x.ra)[-1].ra
-    ymax = sorted(starList,key=lambda x : x.dec)[-1].dec
-    x0 = cluster.mean_ra
-    y0 = cluster.mean_dec
+    xmax = max(starX)
+    ymax = max(starY)
+    x0 = np.mean(starX)
+    y0 = np.mean(starY)
     newN = N
     
     #Determine radius of the field of view
@@ -2994,7 +3167,10 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     rads=[]
     for star in starList:
         #Radial distance from the mean RA and Dec of the cluster
-        rads.append(np.sqrt((star.ra-x0)**2+(star.dec-y0)**2))
+        if normalize:
+            rads.append(np.sqrt((star.ra*np.cos(star.dec*np.pi/180)-x0)**2+(star.dec-y0)**2))
+        else:
+            rads.append(np.sqrt((star.ra-x0)**2+(star.dec-y0)**2))
         #Find the nearest ring to the star
         r = find_nearest(rings, rads[-1])
         i = rings.index(r)
@@ -3090,7 +3266,7 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     plt.scatter(x,numDensity)
     plt.xlabel("Radius (deg)")
     plt.ylabel(r"Surface Number Density ($deg^{-2}$)")
-    plt.title(f"{clname} {mode.capitalize()} Number Density")
+    plt.title(f"{clname} {mode.capitalize()} Number Density".replace("_normalized",' Normalized'))
     
     #Fit an exponential curve to the density plot based on the densityProfile function defined above
     
@@ -3122,7 +3298,7 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
 
     
     #Plot the curve fit    
-    numLabel = ( f"N={newN} ({mode.capitalize()})"+"\n" 
+    numLabel = ( f"N={newN} ({mode.capitalize()})".replace("_normalized",' Normalized')+"\n" 
     + fr"K={fit[0]:.3f} $\pm$ {err_coeff:.3f}" + "\n" 
     + fr"$\rho$={np.abs(fit[1]):.3f}$\degree$ $\pm$ {err:.3f}$\degree$"+ "\n" 
     + fr"R={scale:.3f}pc $\pm$ {scaleVar:.3f}pc" )
@@ -3138,7 +3314,7 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     
     
     #Double plot for bounded regions
-    if mode == "bounded":
+    if "bounded" in mode:
         plt.figure(f"{clname}_density_filtered")
         
         plt.title(f"{clname} Overlaid Number Density")
@@ -3162,7 +3338,7 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     plt.scatter(x,massDensity)
     plt.xlabel("Radius (deg)")
     plt.ylabel(r"Surface Mass Density ($M_{\odot}*deg^{-2}$)")
-    plt.title(f"{clname} {mode.capitalize()} Mass Density")
+    plt.title(f"{clname} {mode.capitalize()} Mass Density".replace("_normalized",' Normalized'))
     
     #Fit an exponential curve to the density plot based on the densityProfile function defined above
     fit_mass,var_mass = so.curve_fit(kingProfile,x,massDensity,p0,maxfev=1000)
@@ -3185,7 +3361,7 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     setattr(cluster,f"massDensity_coeff_err_{mode}",err_mass_coeff)
     
     #Plot the curve fit
-    massLabel = ( f"N={newN} ({mode.capitalize()})"+"\n" 
+    massLabel = ( f"N={newN} ({mode.capitalize()})".replace("_normalized",' Normalized')+"\n" 
     + fr"K={fit_mass[0]:.3f} $\pm$ {err_mass_coeff:.3f}" + "\n" 
     + fr"$\rho$={np.abs(fit_mass[1]):.3f}$\degree$ $\pm$ {err_mass:.3f}$\degree$"+ "\n" 
     + fr"R={scale_mass:.3f}pc $\pm$ {scaleVar_mass:.3f}pc" )
@@ -3200,7 +3376,7 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     plt.savefig(f"{cluster.imgPath}png/{clname}_massDensity_log_{mode}.png",dpi=500)
     
     #Double plot for bounded regions
-    if mode == "bounded":
+    if "bounded" in mode:
         plt.figure(f"{clname}_mass_density_filtered")
         
         plt.title(f"{clname} Overlaid Mass Density")
@@ -3225,14 +3401,14 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     
     #Average Mass plot
     plt.figure(f"{clname}_average_mass_{mode}")
-    plt.scatter(xDist,averageMass,label=fr"N={newN} ({mode.capitalize()})"+"\n"+f"{numPercentileBins} Percentile Bins")
+    plt.scatter(xDist,averageMass,label=fr"N={newN} ({mode.capitalize()})".replace("_normalized",' Normalized')+"\n"+f"{numPercentileBins} Percentile Bins")
     plt.xlabel("Distance from Center (pc)")
     plt.ylabel(r"Average Stellar Mass ($M_{\odot}$)")
-    plt.title(f"{clname} {mode.capitalize()} Average Mass")
+    plt.title(f"{clname} {mode.capitalize()} Average Mass".replace("_normalized",' Normalized'))
     
     
     #Split average mass data into numPercentileBins number of bins
-    if mode == "filtered":
+    if "filtered" in mode:
         cluster.pMin = xDist[0]
         cluster.pMax = xDist[-1]
         
@@ -3299,25 +3475,25 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     
     fitLabel = ( fr"Slope = {fitslope:.3f} $\pm$ {fitslope_err:.3f}" + "\n" 
     + fr"Intercept = {intercept:.3f} $\pm$ {intercept_err:.3f}" + "\n" 
-    + fr"$r^2$ = {rval**2:.3f} ({mode.capitalize()})" )
+    + fr"$r^2$ = {rval**2:.3f} ({mode.capitalize()})".replace("_normalized",' Normalized'))
     
     #Plot the quantile and standard means on the existing average mass plot
-    plt.scatter(meanBins,quantileMean,color='red',label=f'Interquartile Mean ({mode.capitalize()})')
+    plt.scatter(meanBins,quantileMean,color='red',label=f'Interquartile Mean ({mode.capitalize()})'.replace("_normalized",' Normalized'))
     plt.plot(xDist,[fitslope*a+intercept for a in xDist],color='red',label=fitLabel)
-    #plt.scatter(meanBins,binMean,color='darkgray',label=f'{mode.capitalize()} Standard Mean')
+    #plt.scatter(meanBins,binMean,color='dimgray',label=f'{mode.capitalize()} Standard Mean')
     plt.legend(fontsize=8,loc='upper right')
     plt.savefig(f"{cluster.imgPath}{clname}_averageMass_{mode}.pdf")
     plt.savefig(f"{cluster.imgPath}png/{clname}_averageMass_{mode}.png",dpi=500)
     
     
     #Double plot for bounded regions
-    if mode == "bounded":
+    if "bounded" in mode:
         plt.figure(f"{clname}_average_mass_filtered")
         
         plt.title(f"{clname} Overlaid Average Mass")
-        plt.scatter(xDist,averageMass,color='midnightblue',label=fr"N={newN} ({mode.capitalize()})"+"\n"+f"{numPercentileBins} Percentile Bins")
+        plt.scatter(xDist,averageMass,color='midnightblue',label=fr"N={newN} ({mode.capitalize()})".replace("_normalized",' Normalized')+"\n"+f"{numPercentileBins} Percentile Bins")
         plt.plot(xDist,[fitslope*a+intercept for a in xDist],color='darkred',label=fitLabel)
-        plt.scatter(meanBins,quantileMean,color='darkred',label=f'Interquartile Mean ({mode.capitalize()})')
+        plt.scatter(meanBins,quantileMean,color='darkred',label=f'Interquartile Mean ({mode.capitalize()})'.replace("_normalized",' Normalized'))
         #plt.scatter(meanBins,binMean,color='black',label=f'{mode.capitalize()} Standard Mean')
         plt.legend(fontsize=8,loc='upper right')
         plt.savefig(f"{cluster.imgPath}{clname}_averageMass_overlay.pdf")
@@ -3325,27 +3501,42 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     
     #========= Radius Plot =========
     plt.figure(f"{clname}_characteristic_radius_{mode}")
-    plt.scatter([star.ra for star in cluster.unfilteredWide],[star.dec for star in cluster.unfilteredWide],s=0.5,c='lightgray',label='Unfiltered')
-    plt.scatter([star.ra for star in cluster.filtered],[star.dec for star in cluster.filtered],s=1,c='midnightblue',label='Filtered')
-    outline1 = Circle([x0,y0],1*abs(getattr(cluster,f"scaleAngle_{mode}")),color='red',fill=False,ls='--',label=fr"$\rho$={1*abs(fit[1]):0.3f}$\degree$",alpha=0.7)
-    outline2 = Circle([x0,y0],5*abs(getattr(cluster,f"scaleAngle_{mode}")),color='red',fill=False,ls='--',label=fr"5$\rho$={2*abs(fit[1]):0.3f}$\degree$",alpha=0.7)
+    if normalize:
+        plt.scatter([star.ra*np.cos(star.dec*np.pi/180) for star in cluster.unfilteredWide],[star.dec for star in cluster.unfilteredWide],s=1,c='lightgray',label='Unfiltered')
+        plt.scatter([star.ra*np.cos(star.dec*np.pi/180) for star in cluster.filtered],[star.dec for star in cluster.filtered],s=2,c='midnightblue',label='Filtered')
+        plt.xlabel("RA*cos(Dec) (Deg)")
+    else:
+        plt.scatter([star.ra for star in cluster.unfilteredWide],[star.dec for star in cluster.unfilteredWide],s=1,c='lightgray',label='Unfiltered')
+        plt.scatter([star.ra for star in cluster.filtered],[star.dec for star in cluster.filtered],s=2,c='midnightblue',label='Filtered')
+        plt.xlabel("RA (Deg)")
+    pltRad = abs(getattr(cluster,f"scaleAngle_{mode}"))
+    outline1 = Circle([x0,y0],1*pltRad,color='red',fill=False,ls='--',label=fr"$\rho$={1*pltRad:0.3f}$\degree$",alpha=0.7)
+    outline2 = Circle([x0,y0],5*pltRad,color='red',fill=False,ls='--',label=fr"5$\rho$={5*pltRad:0.3f}$\degree$",alpha=0.7)
     #outline3 = Circle([x0,y0],10*abs(getattr(cluster,f"scaleAngle_{mode}")),color='red',fill=False,ls='--',label=fr"10$\rho$={3*abs(fit[1]):0.3f}$\degree$",alpha=0.7)
     plt.gca().add_patch(outline1)
     plt.gca().add_patch(outline2)
     #plt.gca().add_patch(outline3)
     plt.legend(fontsize=10,loc='upper right')
     plt.axis('square')
-    plt.xlabel("RA (Deg)")
+    
     plt.ylabel("DEC (Deg)")
-    plt.title(f"{clname} {mode.capitalize()} Characteristic Radius")
+    plt.title(f"{clname} {mode.capitalize()} Characteristic Radius".replace("_normalized",' Normalized'))
     plt.gcf().set_size_inches(8,8)
     plt.savefig(f"{cluster.imgPath}{clname}_radialMembership_{mode}.pdf")
     plt.savefig(f"{cluster.imgPath}png/{clname}_radialMembership_{mode}.png",dpi=500)
     
-    if "M67" in clname and mode == "filtered":
+    if "M67" in clname and "filtered" in mode:
         plt.figure(f"{clname}_rings_{mode}")
-        plt.scatter([star.ra for star in cluster.unfilteredWide],[star.dec for star in cluster.unfilteredWide],s=0.5,c='lightgray',label='Unfiltered')
-        plt.scatter([star.ra for star in cluster.filtered],[star.dec for star in cluster.filtered],s=1,c='midnightblue',label='Filtered')
+        if normalize:
+            plt.scatter([star.ra*np.cos(star.dec*np.pi/180) for star in cluster.unfilteredWide],[star.dec for star in cluster.unfilteredWide],s=1,c='lightgray',label='Unfiltered')
+            plt.scatter([star.ra*np.cos(star.dec*np.pi/180) for star in cluster.filtered],[star.dec for star in cluster.filtered],s=2,c='midnightblue',label='Filtered')
+            plt.xlabel("RA*cos(Dec) (Deg)")
+            
+        else:
+            plt.scatter([star.ra for star in cluster.unfilteredWide],[star.dec for star in cluster.unfilteredWide],s=1,c='lightgray',label='Unfiltered')
+            plt.scatter([star.ra for star in cluster.filtered],[star.dec for star in cluster.filtered],s=2,c='midnightblue',label='Filtered')
+            plt.xlabel("RA (Deg)")
+            
         
         for i in range(0,len(rings)):
             outline = Circle([x0,y0],rings[i],color='red',fill=False)
@@ -3353,16 +3544,16 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
         
         plt.legend(fontsize=10,loc='upper right')
         plt.axis('square')
-        plt.xlabel("RA (Deg)")
+        
         plt.ylabel("DEC (Deg)")
         plt.title(f"{clname} Radial Bins")
         plt.gcf().set_size_inches(8,8)
-        plt.savefig(f"SpecificPlots/pdf/{clname}_radialBins.pdf")
-        plt.savefig(f"SpecificPlots/png/{clname}_radialBins.png",dpi=500)
-        plt.xlim(132.7,133)
-        plt.ylim(11.67,11.97)
-        plt.savefig(f"SpecificPlots/pdf/{clname}_radialBins_center.pdf")
-        plt.savefig(f"SpecificPlots/png/{clname}_radialBins_center.png",dpi=500)
+        plt.savefig(f"SpecificPlots/pdf/{clname}_radialBins_{mode}.pdf".replace("_filtered",''))
+        plt.savefig(f"SpecificPlots/png/{clname}_radialBins_{mode}.png".replace("_filtered",''),dpi=500)
+        plt.xlim(x0-0.15,x0+0.15)
+        plt.ylim(y0-0.15,y0+0.15)
+        plt.savefig(f"SpecificPlots/pdf/{clname}_radialBins_center_{mode}.pdf".replace("_filtered",''))
+        plt.savefig(f"SpecificPlots/png/{clname}_radialBins_center_{mode}.png".replace("_filtered",''),dpi=500)
     
     
     #========= Stars by Mass =========
@@ -3370,27 +3561,31 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     innerMassList = []
     for star in starList:
         massList.append(star.proxyMass)
-        if np.sqrt((star.ra-x0)**2+(star.dec-y0)**2) <= getattr(cluster,f"scaleAngle_{mode}"):
-            innerMassList.append(star.proxyMass)
+        if normalize:
+            if np.sqrt((star.ra*np.cos(star.dec*np.pi/180)-x0)**2+(star.dec-y0)**2) <= getattr(cluster,f"scaleAngle_{mode}"):
+                innerMassList.append(star.proxyMass)
+        else:
+            if np.sqrt((star.ra-x0)**2+(star.dec-y0)**2) <= getattr(cluster,f"scaleAngle_{mode}"):
+                innerMassList.append(star.proxyMass)
     
     mBins = np.arange(min(massList),max(massList)+0.1,0.1)
     inBins = np.arange(min(innerMassList),max(innerMassList)+0.1,0.1)
     plt.figure(f"{clname}_mass_frequency_{mode}")
     plt.xlabel(r"Stellar Mass ($M_{\odot}$)")
     plt.ylabel("Number of Stars")
-    plt.title(f"{clname} {mode.capitalize()} Mass Frequency")
-    plt.hist(massList,bins=mBins,label=f"Total {mode.capitalize()}")
-    plt.hist(innerMassList,bins=inBins,color='midnightblue',label=f'Inside Core Radius ({mode.capitalize()})')
+    plt.title(f"{clname} {mode.capitalize()} Mass Frequency".replace("_normalized",' Normalized'))
+    plt.hist(massList,bins=mBins,label=f"Total {mode.capitalize()}".replace("_normalized",' Normalized'))
+    plt.hist(innerMassList,bins=inBins,color='midnightblue',label=f'Inside Core Radius ({mode.capitalize()})'.replace("_normalized",' Normalized'))
     plt.legend(fontsize=10,loc='upper right')
     plt.savefig(f"{cluster.imgPath}{clname}_massFrequency_{mode}.pdf")
     plt.savefig(f"{cluster.imgPath}png/{clname}_massFrequency_{mode}.png",dpi=500)
 
     #Double plot for bounded regions
-    if mode == "bounded":
+    if "bounded" in mode:
         plt.figure(f"{clname}_mass_frequency_filtered")
         plt.title(f"{clname} Overlaid Mass Frequency")
-        plt.hist(massList,bins=mBins,label=f"Total {mode.capitalize()}",color='red')
-        plt.hist(innerMassList,bins=inBins,color='darkred',label=f'Inside Core Radius ({mode.capitalize()})')
+        plt.hist(massList,bins=mBins,label=f"Total {mode.capitalize()}".replace("_normalized",' Normalized'),color='red')
+        plt.hist(innerMassList,bins=inBins,color='darkred',label=f'Inside Core Radius ({mode.capitalize()})'.replace("_normalized",' Normalized'))
         plt.legend(fontsize=10,loc='upper right')
         plt.savefig(f"{cluster.imgPath}{clname}_massFrequency_overlay.pdf")
         plt.savefig(f"{cluster.imgPath}png/{clname}_massFrequency_overlay.png",dpi=500)
@@ -3401,27 +3596,31 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     innerMagList = []
     for star in starList:
         magList.append(star.g_mag-2.1*cluster.reddening-cluster.dist_mod)
-        if np.sqrt((star.ra-x0)**2+(star.dec-y0)**2) <= getattr(cluster,f"scaleAngle_{mode}"):
-            innerMagList.append(star.g_mag-2.1*cluster.reddening-cluster.dist_mod)
+        if normalize:
+            if np.sqrt((star.ra*np.cos(star.dec*np.pi/180)-x0)**2+(star.dec-y0)**2) <= getattr(cluster,f"scaleAngle_{mode}"):
+                innerMagList.append(star.g_mag-2.1*cluster.reddening-cluster.dist_mod)
+        else:
+            if np.sqrt((star.ra-x0)**2+(star.dec-y0)**2) <= getattr(cluster,f"scaleAngle_{mode}"):
+                innerMagList.append(star.g_mag-2.1*cluster.reddening-cluster.dist_mod)
     
     mBins = np.arange(min(magList),max(magList)+0.1,0.1)
     inBins = np.arange(min(innerMagList),max(innerMagList)+0.1,0.1)
     plt.figure(f"{clname}_mag_frequency_{mode}")
     plt.xlabel(r"Absolute G Mag")
     plt.ylabel("Number of Stars")
-    plt.title(f"{clname} {mode.capitalize()} Absolute Magnitude Frequency")
-    plt.hist(magList,bins=mBins,label=f"Total {mode.capitalize()}")
-    plt.hist(innerMagList,bins=inBins,color='midnightblue',label=f'Inside Core Radius ({mode.capitalize()})')
+    plt.title(f"{clname} {mode.capitalize()} Absolute Magnitude Frequency".replace("_normalized",' Normalized'))
+    plt.hist(magList,bins=mBins,label=f"Total {mode.capitalize()}".replace("_normalized",' Normalized'))
+    plt.hist(innerMagList,bins=inBins,color='midnightblue',label=f'Inside Core Radius ({mode.capitalize()})'.replace("_normalized",' Normalized'))
     plt.legend(fontsize=10,loc='upper right')
     plt.savefig(f"{cluster.imgPath}{clname}_magFrequency_{mode}.pdf")
     plt.savefig(f"{cluster.imgPath}png/{clname}_magFrequency_{mode}.png",dpi=500)
 
     #Double plot for bounded regions
-    if mode == "bounded":
+    if "bounded" in mode:
         plt.figure(f"{clname}_mag_frequency_filtered")
         plt.title(f"{clname} Overlaid Absolute Magnitude Frequency")
-        plt.hist(magList,bins=mBins,label=f"Total {mode.capitalize()}",color='red')
-        plt.hist(innerMagList,bins=inBins,color='darkred',label=f'Inside Core Radius ({mode.capitalize()})')
+        plt.hist(magList,bins=mBins,label=f"Total {mode.capitalize()}".replace("_normalized",' Normalized'),color='red')
+        plt.hist(innerMagList,bins=inBins,color='darkred',label=f'Inside Core Radius ({mode.capitalize()})'.replace("_normalized",' Normalized'))
         plt.legend(fontsize=10,loc='upper right')
         plt.savefig(f"{cluster.imgPath}{clname}_magFrequency_overlay.pdf")
         plt.savefig(f"{cluster.imgPath}png/{clname}_magFrequency_overlay.png",dpi=500)
@@ -3431,27 +3630,31 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     innerColorList = []
     for star in starList:
         colorList.append(star.b_r-cluster.reddening)
-        if np.sqrt((star.ra-x0)**2+(star.dec-y0)**2) <= getattr(cluster,f"scaleAngle_{mode}"):
-            innerColorList.append(star.b_r-cluster.reddening)
+        if normalize:
+            if np.sqrt((star.ra*np.cos(star.dec*np.pi/180)-x0)**2+(star.dec-y0)**2) <= getattr(cluster,f"scaleAngle_{mode}"):
+                innerColorList.append(star.b_r-cluster.reddening)
+        else:
+            if np.sqrt((star.ra-x0)**2+(star.dec-y0)**2) <= getattr(cluster,f"scaleAngle_{mode}"):
+                innerColorList.append(star.b_r-cluster.reddening)
     
     mBins = np.arange(min(colorList),max(colorList)+0.1,0.1)
     inBins = np.arange(min(innerColorList),max(innerColorList)+0.1,0.1)
     plt.figure(f"{clname}_color_frequency_{mode}")
     plt.xlabel(r"Dereddened BP-RP")
     plt.ylabel("Number of Stars")
-    plt.title(f"{clname} {mode.capitalize()} Dereddened Color Index Frequency")
-    plt.hist(colorList,bins=mBins,label=f"Total {mode.capitalize()}")
-    plt.hist(innerColorList,bins=inBins,color='midnightblue',label=f'Inside Core Radius ({mode.capitalize()})')
+    plt.title(f"{clname} {mode.capitalize()} Dereddened Color Index Frequency".replace("_normalized",' Normalized'))
+    plt.hist(colorList,bins=mBins,label=f"Total {mode.capitalize()}".replace("_normalized",' Normalized'))
+    plt.hist(innerColorList,bins=inBins,color='midnightblue',label=f'Inside Core Radius ({mode.capitalize()})'.replace("_normalized",' Normalized'))
     plt.legend(fontsize=10,loc='upper right')
     plt.savefig(f"{cluster.imgPath}{clname}_colorFrequency_{mode}.pdf")
     plt.savefig(f"{cluster.imgPath}png/{clname}_colorFrequency_{mode}.png",dpi=500)
 
     #Double plot for bounded regions
-    if mode == "bounded":
+    if "bounded" in mode:
         plt.figure(f"{clname}_color_frequency_filtered")
         plt.title(f"{clname} Overlaid Dereddened Color Index Frequency")
-        plt.hist(colorList,bins=mBins,label=f"Total {mode.capitalize()}",color='red')
-        plt.hist(innerColorList,bins=inBins,color='darkred',label=f'Inside Core Radius ({mode.capitalize()})')
+        plt.hist(colorList,bins=mBins,label=f"Total {mode.capitalize()}".replace("_normalized",' Normalized'),color='red')
+        plt.hist(innerColorList,bins=inBins,color='darkred',label=f'Inside Core Radius ({mode.capitalize()})'.replace("_normalized",' Normalized'))
         plt.legend(fontsize=10,loc='upper right')
         plt.savefig(f"{cluster.imgPath}{clname}_colorFrequency_overlay.pdf")
         plt.savefig(f"{cluster.imgPath}png/{clname}_colorFrequency_overlay.png",dpi=500)
@@ -3462,33 +3665,60 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     massSum = np.sum([star.proxyMass for star in starList])
     intensitySum = np.sum([toIntensity(star.g_mag) for star in starList])
     
-    setattr(cluster,f"medianRad_{mode}",np.median([np.abs(star.radDist*3600/206265)/(cluster.mean_par/1000) for star in starList]))
-    setattr(cluster,f"medianAngle_{mode}",np.median([star.radDist for star in starList]))
-    radialStarList = sorted(starList,key=lambda x: x.radDist)
-    
     curMassSum = 0
     curIntSum = 0
     massFound = False
     intFound = False
     
-    for star in radialStarList:
-        curMassSum += star.proxyMass
-        curIntSum += toIntensity(star.g_mag)
+    if normalize:
+        setattr(cluster,f"medianRad_{mode}",np.median([np.abs(star.normRadDist*3600/206265)/(cluster.mean_par/1000) for star in starList]))
+        setattr(cluster,f"medianAngle_{mode}",np.median([star.normRadDist for star in starList]))
+        radialStarList = sorted(starList,key=lambda x: x.normRadDist)
         
-        if curMassSum > massSum/2 and not massFound:
-            setattr(cluster,f"halfMassRad_{mode}",np.abs(star.radDist*3600/206265)/(cluster.mean_par/1000))
-            setattr(cluster,f"halfMassAngle_{mode}",star.radDist)
-            massFound = True
-        if curIntSum > intensitySum/2 and not intFound:
-            setattr(cluster,f"halfLightRad_{mode}",np.abs(star.radDist*3600/206265)/(cluster.mean_par/1000))
-            setattr(cluster,f"halfLightAngle_{mode}",star.radDist)
-            intFound = True
-        if massFound and intFound:
-            break
+        for star in radialStarList:
+            curMassSum += star.proxyMass
+            curIntSum += toIntensity(star.g_mag)
+            
+            if curMassSum > massSum/2 and not massFound:
+                setattr(cluster,f"halfMassRad_{mode}",np.abs(star.normRadDist*3600/206265)/(cluster.mean_par/1000))
+                setattr(cluster,f"halfMassAngle_{mode}",star.normRadDist)
+                massFound = True
+            if curIntSum > intensitySum/2 and not intFound:
+                setattr(cluster,f"halfLightRad_{mode}",np.abs(star.normRadDist*3600/206265)/(cluster.mean_par/1000))
+                setattr(cluster,f"halfLightAngle_{mode}",star.normRadDist)
+                intFound = True
+            if massFound and intFound:
+                break
+        
+        plt.figure(f"{clname}_other_radii_{mode}")
+        plt.scatter([star.ra*np.cos(star.dec*np.pi/180) for star in cluster.unfilteredWide],[star.dec for star in cluster.unfilteredWide],s=1,c='lightgray',label='Unfiltered')
+        plt.scatter([star.ra*np.cos(star.dec*np.pi/180) for star in cluster.filtered],[star.dec for star in cluster.filtered],s=2,c='midnightblue',label='Filtered')
+        plt.xlabel("RA*cos(Dec) (deg)")
+    else:
+        setattr(cluster,f"medianRad_{mode}",np.median([np.abs(star.radDist*3600/206265)/(cluster.mean_par/1000) for star in starList]))
+        setattr(cluster,f"medianAngle_{mode}",np.median([star.radDist for star in starList]))
+        radialStarList = sorted(starList,key=lambda x: x.radDist)
+        
+        for star in radialStarList:
+            curMassSum += star.proxyMass
+            curIntSum += toIntensity(star.g_mag)
+            
+            if curMassSum > massSum/2 and not massFound:
+                setattr(cluster,f"halfMassRad_{mode}",np.abs(star.radDist*3600/206265)/(cluster.mean_par/1000))
+                setattr(cluster,f"halfMassAngle_{mode}",star.radDist)
+                massFound = True
+            if curIntSum > intensitySum/2 and not intFound:
+                setattr(cluster,f"halfLightRad_{mode}",np.abs(star.radDist*3600/206265)/(cluster.mean_par/1000))
+                setattr(cluster,f"halfLightAngle_{mode}",star.radDist)
+                intFound = True
+            if massFound and intFound:
+                break
+        
+        plt.figure(f"{clname}_other_radii_{mode}")
+        plt.scatter([star.ra for star in cluster.unfilteredWide],[star.dec for star in cluster.unfilteredWide],s=1,c='lightgray',label='Unfiltered')
+        plt.scatter([star.ra for star in cluster.filtered],[star.dec for star in cluster.filtered],s=2,c='midnightblue',label='Filtered')
+        plt.xlabel("RA (deg)")
     
-    plt.figure(f"{clname}_other_radii_{mode}")
-    plt.scatter([star.ra for star in cluster.unfilteredWide],[star.dec for star in cluster.unfilteredWide],s=0.5,c='lightgray',label='Unfiltered')
-    plt.scatter([star.ra for star in cluster.filtered],[star.dec for star in cluster.filtered],s=1,c='midnightblue',label='Filtered')
     medRad = getattr(cluster,f"medianRad_{mode}")
     medAngle = getattr(cluster,f"medianAngle_{mode}")
     mRad = getattr(cluster,f"halfMassRad_{mode}")
@@ -3504,9 +3734,8 @@ def membership(clname='M67',N=100,mode='filtered',numPercentileBins=5,percentile
     plt.gca().add_patch(outline3)
     plt.legend(fontsize=10,loc='upper right')
     plt.axis('square')
-    plt.xlabel("RA (deg)")
     plt.ylabel("DEC (Deg)")
-    plt.title(f"{clname} {mode.capitalize()} Various Radii")
+    plt.title(f"{clname} {mode.capitalize()} Various Radii".replace("_normalized",' Normalized'))
     plt.gcf().set_size_inches(8,8)
     plt.savefig(f"{cluster.imgPath}{clname}_otherRadii_{mode}.pdf")
     plt.savefig(f"{cluster.imgPath}png/{clname}_otherRadii_{mode}.png",dpi=500)
